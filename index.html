@@ -306,6 +306,27 @@ body.blank-mode .footer-logo{color:#000;}
 .footer-sub{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:2px;line-height:2;}
 .disclaimer{max-width:580px;margin:2rem auto 0;font-size:11px;color:var(--muted);line-height:1.7;opacity:.6;}
 
+/* Nav logo text */
+.nav-logo-text{
+  font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--accent);
+  letter-spacing:4px;transition:color .3s;
+}
+body.blank-mode .nav-logo-text{color:#000;}
+@media(max-width:860px){.nav-logo-text{font-size:20px;letter-spacing:2px;}}
+
+/* Mobile BUY NOW button — always visible regardless of theme */
+.mob-buy-btn{
+  display:block;text-align:center;padding:12px 20px;margin-top:4px;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;letter-spacing:.3px;
+  text-decoration:none;
+  background:#b5f23d;color:#000 !important;
+  border:2px solid #b5f23d;
+  box-shadow:4px 4px 0 rgba(181,242,61,.4);
+  transition:box-shadow .12s,transform .12s;
+}
+.mob-buy-btn:hover{box-shadow:2px 2px 0 rgba(181,242,61,.4);transform:translate(2px,2px);}
+body.blank-mode .mob-buy-btn{background:#000;color:#fff !important;border-color:#000;box-shadow:4px 4px 0 #c8e845;}
+
 /* ---- THEME TOGGLE SWITCH ---- */
 .theme-switch-wrap{display:flex;align-items:center;gap:8px;}
 .ts-label{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);transition:color .2s;user-select:none;}
@@ -345,8 +366,9 @@ body.blank-mode .ts-thumb{transform:translateX(24px);background:#fff;}
 
 <!-- NAV -->
 <nav>
-  <a class="nav-logo" href="#" style="display:flex;align-items:center;">
+  <a class="nav-logo" href="#" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
     <img id="nav-logo-img" src="https://raw.githubusercontent.com/deficrawler-dev/Allin/main/dark.png" alt="$ALLIN" style="height:38px;width:auto;object-fit:contain;transition:opacity .3s;">
+    <span class="nav-logo-text">$ALLIN</span>
   </a>
   <ul class="nav-links">
     <li><a href="#stats">Live Data</a></li>
@@ -382,7 +404,7 @@ body.blank-mode .ts-thumb{transform:translateX(24px);background:#fff;}
   <a href="#buy" onclick="closeMob()">How to Buy</a>
   <a href="#community" onclick="closeMob()">Community</a>
   <!-- BUY NOW inside hamburger on mobile -->
-  <a href="https://blank.build/token/aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK" target="_blank" class="btn-blank" onclick="closeMob()" style="margin-top:4px;text-align:center;font-size:13px;">BUY NOW</a>
+  <a href="https://blank.build/token/aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK" target="_blank" class="mob-buy-btn" onclick="closeMob()">BUY NOW</a>
   <div class="mob-theme">
     <span class="mob-theme-lbl">THEME:</span>
     <button class="ts-track" id="mobThemeSwitch" onclick="toggleThemeSwitch()" aria-label="Toggle theme" style="margin-left:8px;">
