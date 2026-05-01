@@ -68,11 +68,12 @@ nav{
   flex-shrink:0;
 }
 .nav-links{
-  display:flex;gap:1.2rem;list-style:none;
+  display:flex;gap:0;list-style:none;
   align-items:center;
   position:absolute;left:50%;transform:translateX(-50%);
+  white-space:nowrap;
 }
-.nav-links a{color:var(--text2);text-decoration:none;font-size:13px;font-weight:600;transition:color .2s;}
+.nav-links a{color:var(--text2);text-decoration:none;font-size:13px;font-weight:600;transition:color .2s;padding:0 14px;}
 .nav-links a:hover{color:var(--text);}
 .nav-right{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0;}
 
