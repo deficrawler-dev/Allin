@@ -57,15 +57,19 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;tra
 /* ---- NAV ---- */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:200;height:62px;
-  display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 2rem;
   background:var(--nav-bg);border-bottom:2px solid var(--border2);
   backdrop-filter:blur(10px);transition:background .3s,border-color .3s;
 }
 .nav-logo{font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--accent);letter-spacing:4px;text-decoration:none;}
-.nav-links{display:flex;gap:1.5rem;list-style:none;}
+.nav-links{
+  display:flex;gap:1.2rem;list-style:none;
+  position:absolute;left:50%;transform:translateX(-50%);
+}
 .nav-links a{color:var(--text2);text-decoration:none;font-size:13px;font-weight:600;transition:color .2s;}
 .nav-links a:hover{color:var(--text);}
-.nav-right{display:flex;align-items:center;gap:10px;}
+.nav-right{display:flex;align-items:center;gap:10px;margin-left:auto;}
 
 
 /* Hamburger */
@@ -750,7 +754,7 @@ body.blank-mode .ts-thumb{transform:translateX(24px);background:#fff;}
 
 <!-- FOOTER -->
 <footer>
-  <span class="footer-logo">$ALLIN</span>
+  <img id="footer-logo-img" src="https://raw.githubusercontent.com/deficrawler-dev/Allin/main/dark.png" alt="$ALLIN" style="height:80px;width:auto;object-fit:contain;display:block;margin:0 auto 1rem;">
   <p class="footer-sub">YOU'VE ONLY GOT 1 SHOT.<br>MIGHT AS WELL GO ALL IN.</p>
   <p class="disclaimer">Not financial advice. Crypto investments are highly speculative. Only invest what you can afford to lose. $ALLIN is a community token on Solana. Always DYOR.</p>
 </footer>
@@ -772,9 +776,11 @@ function setTheme(t){
   const isBlank=t==='blank';
   document.body.classList.toggle('blank-mode',isBlank);
 
-  // Logo swap
+  // Logo swap (nav + footer)
   const logoImg=document.getElementById('nav-logo-img');
   if(logoImg)logoImg.src=isBlank?LOGO_BLANK:LOGO_DARK;
+  const footerLogo=document.getElementById('footer-logo-img');
+  if(footerLogo)footerLogo.src=isBlank?LOGO_BLANK:LOGO_DARK;
 
   // Toggle switch label highlights
   const lDark=document.getElementById('ts-lbl-dark');
