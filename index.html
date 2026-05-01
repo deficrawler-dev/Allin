@@ -57,15 +57,22 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;tra
 /* ---- NAV ---- */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:200;height:62px;
-  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
-  padding:0 2rem;gap:1rem;
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  padding:0 2rem;
+  gap:1rem;
   background:var(--nav-bg);border-bottom:2px solid var(--border2);
   backdrop-filter:blur(10px);transition:background .3s,border-color .3s;
 }
-.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--accent);letter-spacing:4px;text-decoration:none;}
+.nav-logo{
+  display:flex;align-items:center;gap:10px;text-decoration:none;
+  justify-content:flex-start;
+}
 .nav-links{
   display:flex;gap:1.2rem;list-style:none;
   justify-content:center;
+  align-items:center;
 }
 .nav-links a{color:var(--text2);text-decoration:none;font-size:13px;font-weight:600;transition:color .2s;}
 .nav-links a:hover{color:var(--text);}
@@ -300,6 +307,7 @@ body.blank-mode .step-a{color:#000;border-color:#000;}
 .comm-card:hover{box-shadow:2px 2px 0 var(--btn-shadow);transform:translate(2px,2px);}
 .comm-icon{width:44px;height:44px;background:var(--text);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .comm-icon svg{fill:var(--bg);}
+
 .comm-name{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;}
 .comm-sub{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;}
 
@@ -370,10 +378,13 @@ body.blank-mode .ts-thumb{transform:translateX(24px);background:#fff;}
 
 <!-- NAV -->
 <nav>
-  <a class="nav-logo" href="#" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+  <!-- LEFT: Logo -->
+  <a class="nav-logo" href="#">
     <img id="nav-logo-img" src="https://raw.githubusercontent.com/deficrawler-dev/Allin/main/dark.png" alt="$ALLIN" style="height:38px;width:auto;object-fit:contain;transition:opacity .3s;">
     <span class="nav-logo-text">$ALLIN</span>
   </a>
+
+  <!-- CENTER: Nav links -->
   <ul class="nav-links">
     <li><a href="#stats">Live Data</a></li>
     <li><a href="#staking">Staking</a></li>
@@ -382,21 +393,21 @@ body.blank-mode .ts-thumb{transform:translateX(24px);background:#fff;}
     <li><a href="#buy">How to Buy</a></li>
     <li><a href="#community">Community</a></li>
   </ul>
-    <div class="nav-right">
-      <!-- Toggle switch — always visible in nav -->
-      <div class="theme-switch-wrap" title="Toggle Dark / Blank">
-        <span class="ts-label" id="ts-lbl-dark">DARK</span>
-        <button class="ts-track" id="themeSwitch" onclick="toggleThemeSwitch()" aria-label="Toggle theme">
-          <span class="ts-thumb" id="tsThumb"></span>
-        </button>
-        <span class="ts-label" id="ts-lbl-blank">BLANK</span>
-      </div>
-      <!-- BUY NOW hidden on mobile — lives inside hamburger instead -->
-      <a href="https://blank.build/token/aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK" target="_blank" class="btn-blank nav-buy-btn" style="font-size:13px;padding:9px 20px;">BUY NOW</a>
-      <button class="hbg" id="hbg" onclick="toggleMob()" aria-label="Menu">
-        <span></span><span></span><span></span>
+
+  <!-- RIGHT: Controls -->
+  <div class="nav-right">
+    <div class="theme-switch-wrap" title="Toggle Dark / Blank">
+      <span class="ts-label" id="ts-lbl-dark">DARK</span>
+      <button class="ts-track" id="themeSwitch" onclick="toggleThemeSwitch()" aria-label="Toggle theme">
+        <span class="ts-thumb" id="tsThumb"></span>
       </button>
+      <span class="ts-label" id="ts-lbl-blank">BLANK</span>
     </div>
+    <a href="https://blank.build/token/aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK" target="_blank" class="btn-blank nav-buy-btn" style="font-size:13px;padding:9px 20px;">BUY NOW</a>
+    <button class="hbg" id="hbg" onclick="toggleMob()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
 </nav>
 
 <!-- Mobile nav -->
@@ -407,7 +418,6 @@ body.blank-mode .ts-thumb{transform:translateX(24px);background:#fff;}
   <a href="#tokenomics" onclick="closeMob()">Tokenomics</a>
   <a href="#buy" onclick="closeMob()">How to Buy</a>
   <a href="#community" onclick="closeMob()">Community</a>
-  <!-- BUY NOW inside hamburger on mobile -->
   <a href="https://blank.build/token/aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK" target="_blank" class="mob-buy-btn" onclick="closeMob()">BUY NOW</a>
   <div class="mob-theme">
     <span class="mob-theme-lbl">THEME:</span>
@@ -737,12 +747,18 @@ body.blank-mode .ts-thumb{transform:translateX(24px);background:#fff;}
       </div>
       <div><div class="comm-name">TELEGRAM</div><div class="comm-sub">t.me/blankerssol</div></div>
     </a>
+
+    <!-- DexScreener with your GitHub-hosted logos -->
     <a href="https://dexscreener.com/solana/aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK" target="_blank" class="comm-card">
-      <div class="comm-icon" style="background:var(--surface3);">
-        <svg width="20" height="20" viewBox="0 0 24 24" style="fill:var(--accent);"><path d="M3 3h18v2H3zm0 4h12v2H3zm0 4h18v2H3zm0 4h12v2H3zm0 4h18v2H3z"/></svg>
+      <div class="comm-icon" style="background:transparent;overflow:hidden;">
+        <img id="dex-logo-img"
+          src="https://raw.githubusercontent.com/deficrawler-dev/Allin/main/Dex%20dark.png"
+          alt="DexScreener"
+          style="width:44px;height:44px;object-fit:contain;display:block;">
       </div>
       <div><div class="comm-name">DEXSCREENER</div><div class="comm-sub">Live chart & data</div></div>
     </a>
+
     <a href="https://blank.build/token/aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK" target="_blank" class="comm-card">
       <div class="comm-icon">
         <svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
@@ -764,7 +780,6 @@ const CA='aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK';
 const HELIUS_KEY='a05b03e1-68ca-49a2-ba75-e0190b4d7654';
 const HELIUS_RPC=`https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
 const HELIUS_API=`https://api.helius.xyz/v0`;
-// Blank's fee splitter program — all staking reward txs come through here
 const BLANK_FEE_SPLITTER='BLANKpBQ5HG9UFjesxEgf4Yd2Tkj8K9e9tGZ5RYkYwGt';
 const BLANK_STAKING_PROG='BLANKiRR2Z9Q36P34aiEDhDHsCmPmP4iXXpAhYr2ZKt9';
 
@@ -775,23 +790,20 @@ const LOGO_BLANK='https://raw.githubusercontent.com/deficrawler-dev/Allin/main/b
 function setTheme(t){
   const isBlank=t==='blank';
   document.body.classList.toggle('blank-mode',isBlank);
-
-  // Logo swap (nav + footer)
   const logoImg=document.getElementById('nav-logo-img');
   if(logoImg)logoImg.src=isBlank?LOGO_BLANK:LOGO_DARK;
   const footerLogo=document.getElementById('footer-logo-img');
   if(footerLogo)footerLogo.src=isBlank?LOGO_BLANK:LOGO_DARK;
-
-  // Toggle switch label highlights
+  const dexLogo=document.getElementById('dex-logo-img');
+  if(dexLogo)dexLogo.src=isBlank
+    ?'https://raw.githubusercontent.com/deficrawler-dev/Allin/main/Dex%20Blank.webp'
+    :'https://raw.githubusercontent.com/deficrawler-dev/Allin/main/Dex%20dark.png';
   const lDark=document.getElementById('ts-lbl-dark');
   const lBlank=document.getElementById('ts-lbl-blank');
   if(lDark)lDark.classList.toggle('active',!isBlank);
   if(lBlank)lBlank.classList.toggle('active',isBlank);
-
-  // Mobile label
   const mobCur=document.getElementById('mob-theme-cur');
   if(mobCur)mobCur.textContent=isBlank?'BLANK':'DARK';
-
   try{localStorage.setItem('allin-theme',t);}catch(e){}
 }
 
@@ -800,7 +812,6 @@ function toggleThemeSwitch(){
   setTheme(isBlank?'dark':'blank');
 }
 
-// Init theme labels on load
 function initThemeLabels(){
   const isBlank=document.body.classList.contains('blank-mode');
   const lDark=document.getElementById('ts-lbl-dark');
@@ -849,7 +860,7 @@ function timeAgo(ts){
 }
 function shortAddr(addr){return addr?addr.slice(0,4)+'...'+addr.slice(-4):'—';}
 
-// ---- SOL PRICE (for USD conversion) ----
+// ---- SOL PRICE ----
 let solPriceUSD=83;
 async function fetchSolPrice(){
   try{
@@ -891,7 +902,6 @@ async function fetchPrice(){
       document.getElementById('tv'+i).textContent=fmtUSD(vol);
     });
 
-    // Update holder count from DexScreener if available
     const holders=pair.info?.holders;
     if(holders){
       document.getElementById('sv-hold').textContent=holders.toLocaleString();
@@ -900,13 +910,7 @@ async function fetchPrice(){
   }catch(e){console.warn('DexScreener error',e);}
 }
 
-// ---- HELIUS: FETCH STAKING DATA ----
-// Strategy:
-// 1. getTokenLargestAccounts → top holders (live)
-// 2. getTokenSupply → total supply
-// 3. Enhanced Transactions API → recent fee distributions from Blank Fee Splitter filtered to this token
-// 4. getSignaturesForAddress on Blank Staking Program → count staker interactions
-
+// ---- HELIUS RPC ----
 async function rpc(method,params){
   const r=await fetch(HELIUS_RPC,{
     method:'POST',
@@ -918,23 +922,18 @@ async function rpc(method,params){
   return d.result;
 }
 
-// Fetch recent transactions from the fee splitter, filter for ones involving our CA
 async function fetchFeeTransactions(){
   try{
     const url=`${HELIUS_API}/addresses/${BLANK_FEE_SPLITTER}/transactions?api-key=${HELIUS_KEY}&limit=100&type=TRANSFER`;
     const r=await fetch(url);
     const txs=await r.json();
     if(!Array.isArray(txs))return[];
-
-    // Filter txs that involve our token CA (appear in tokenTransfers or accountData)
     const relevant=txs.filter(tx=>{
       const hasToken=(tx.tokenTransfers||[]).some(t=>t.mint===CA);
       const hasAccount=(tx.accountData||[]).some(a=>a.account===CA);
       const desc=(tx.description||'').includes(CA.slice(0,8));
       return hasToken||hasAccount||desc;
     });
-
-    // If filtered is too short, fall back to all recent txs from the splitter
     const pool=relevant.length>=3?relevant:txs.slice(0,20);
     return pool;
   }catch(e){
@@ -943,7 +942,6 @@ async function fetchFeeTransactions(){
   }
 }
 
-// Fetch all transactions involving the token from Helius enhanced API
 async function fetchTokenTransactions(){
   try{
     const url=`${HELIUS_API}/addresses/${CA}/transactions?api-key=${HELIUS_KEY}&limit=50`;
@@ -956,7 +954,6 @@ async function fetchTokenTransactions(){
   }
 }
 
-// Fetch token largest accounts (top holders)
 async function fetchTopHolders(){
   try{
     const res=await rpc('getTokenLargestAccounts',[CA]);
@@ -967,7 +964,6 @@ async function fetchTopHolders(){
   }
 }
 
-// Fetch token supply
 async function fetchTokenSupply(){
   try{
     const res=await rpc('getTokenSupply',[CA]);
@@ -978,7 +974,6 @@ async function fetchTokenSupply(){
   }
 }
 
-// Count unique staker addresses from staking program signatures
 async function fetchStakerCount(){
   try{
     const res=await rpc('getSignaturesForAddress',[BLANK_STAKING_PROG,{limit:1000}]);
@@ -988,74 +983,42 @@ async function fetchStakerCount(){
   }
 }
 
-// Calculate total SOL moved through fee splitter txs for this token
 function calcFeeStats(txs){
   let totalSol=0;
   let stakingSol=0;
   const feeRows=[];
-
   txs.forEach(tx=>{
-    // Look at nativeTransfers to find SOL amounts
     const nativeT=tx.nativeTransfers||[];
-    // Look for outgoing SOL from fee splitter
     const splitterOuts=nativeT.filter(t=>t.fromUserAccount===BLANK_FEE_SPLITTER&&t.amount>0);
     splitterOuts.forEach(t=>{
       const solAmt=t.amount/1e9;
       totalSol+=solAmt;
-      stakingSol+=solAmt; // All distributions from splitter = staking rewards
+      stakingSol+=solAmt;
     });
-
     if(splitterOuts.length>0){
       const totalTxSol=splitterOuts.reduce((s,t)=>s+t.amount/1e9,0);
-      feeRows.push({
-        ts:tx.timestamp,
-        sig:tx.signature,
-        amount:totalTxSol,
-        type:'STAKING'
-      });
+      feeRows.push({ts:tx.timestamp,sig:tx.signature,amount:totalTxSol,type:'STAKING'});
     }
   });
-
   return{totalSol,stakingSol,feeRows};
 }
 
-// ---- RENDER STAKING DASHBOARD ----
 async function fetchStakingData(){
   const pill=document.getElementById('stk-pill');
   if(pill)pill.innerHTML='<div class="live-dot" style="width:6px;height:6px;margin-right:0;"></div>FETCHING...';
-
   try{
-    // Run fetches in parallel
     const [feeTxs,tokenTxs,topHolders,supply]=await Promise.all([
-      fetchFeeTransactions(),
-      fetchTokenTransactions(),
-      fetchTopHolders(),
-      fetchTokenSupply()
+      fetchFeeTransactions(),fetchTokenTransactions(),fetchTopHolders(),fetchTokenSupply()
     ]);
-
-    // --- FEE STATS ---
     const{totalSol,stakingSol,feeRows}=calcFeeStats(feeTxs.length>0?feeTxs:tokenTxs);
-
-    // Use on-chain data if we got it, otherwise show last known values
     const displayTotal=totalSol>0?totalSol:134.7034;
     const displayStaking=stakingSol>0?stakingSol:133.95;
     const displayCreator=Math.max(0,displayTotal-displayStaking);
     const creatorPct=displayTotal>0?(displayCreator/displayTotal*100):0.5;
     const stakingPct=displayTotal>0?(displayStaking/displayTotal*100):99.5;
-
-    // --- SUPPLY / STAKED ---
-    // Total staked = supply - circulating large accounts
     const totalSupply=supply?parseInt(supply.amount)/Math.pow(10,supply.decimals):1000000000;
-    // Estimate staked tokens: largest accounts that aren't top-2 (treasury/team) = community + staked
     const communityHeld=topHolders.slice(2).reduce((s,h)=>s+(parseInt(h.amount||0)/1e6),0);
-    // Top 2 = treasury + team (known locked), rest = circulating. Staked is a portion of circulating.
-    const stakedEstimate=Math.min(communityHeld*0.6,totalSupply*0.35); // conservative
-
-    // --- APR ESTIMATE ---
-    // APR = (annual staking rewards / total staked in USD) * 100
-    // Annual rewards estimated from recent 24h volume * fee rate
-    // We know 100% staker share, fee is ~1% of volume
-    // Use DexScreener vol if available, else estimate from fee txs
+    const stakedEstimate=Math.min(communityHeld*0.6,totalSupply*0.35);
     let aprEst=0;
     try{
       const dexR=await fetch('https://api.dexscreener.com/latest/dex/tokens/'+CA);
@@ -1065,37 +1028,26 @@ async function fetchStakingData(){
         const vol24h=pair.volume?.h24||0;
         const mktCap=pair.fdv||0;
         const stakedUSD=(stakedEstimate/totalSupply)*mktCap;
-        const dailyRewardUSD=vol24h*0.0075; // ~0.75% fee to stakers
+        const dailyRewardUSD=vol24h*0.0075;
         if(stakedUSD>0)aprEst=(dailyRewardUSD*365/stakedUSD)*100;
       }
     }catch(e){}
-
-    // --- UPDATE DOM: STAKING METRICS ---
     const aprDisplay=aprEst>0?(aprEst.toFixed(2)+'%'):'827%+';
     const stakedDisplay=fmtTokens(stakedEstimate>0?stakedEstimate:299730000);
-
     document.getElementById('stk-apr').textContent=aprDisplay;
     document.getElementById('stk-total').textContent=stakedDisplay;
     document.getElementById('stk-share').textContent='100%';
-
-    // Staker count: use Helius signature count as proxy, cap for display
     const sigCount=await fetchStakerCount();
     const stakerDisplay=sigCount>0?Math.min(sigCount,999):154;
     document.getElementById('stk-stakers').textContent=stakerDisplay;
-
-    // --- FEE SUMMARY BOXES ---
     document.getElementById('stk-fees-total').textContent=displayTotal.toFixed(4)+' SOL';
     document.getElementById('stk-fees-usd').textContent='≈ '+fmtUSD(displayTotal*solPriceUSD)+' USD';
     document.getElementById('stk-rewards').textContent=displayStaking.toFixed(4)+' SOL';
     document.getElementById('stk-creator').textContent=displayCreator.toFixed(4)+' SOL';
     document.getElementById('stk-bar-rewards').style.width=stakingPct.toFixed(1)+'%';
     document.getElementById('stk-bar-creator').style.width=Math.max(0.5,creatorPct).toFixed(1)+'%';
-
-    // --- LIVE FEE ROWS ---
     const rowsEl=document.getElementById('stk-fee-rows');
     let rowsToShow=feeRows.sort((a,b)=>b.ts-a.ts).slice(0,12);
-
-    // Fallback to static known data if Helius returned nothing filterable
     if(rowsToShow.length===0){
       rowsToShow=[
         {ts:1746100860,sig:'92PUHxxx',amount:0.0903,type:'STAKING'},
@@ -1109,7 +1061,6 @@ async function fetchStakingData(){
         {ts:1746075720,sig:'4cZJyxxx',amount:0.0331,type:'STAKING'},
       ];
     }
-
     rowsEl.innerHTML=rowsToShow.map(row=>{
       const shortSig=row.sig.slice(0,8)+'...';
       const fullSig=row.sig;
@@ -1121,11 +1072,7 @@ async function fetchStakingData(){
         <a href="https://solscan.io/tx/${fullSig}" target="_blank" class="tx-a">${shortSig} ↗</a>
       </div>`;
     }).join('');
-
-    // Insert header row
     rowsEl.innerHTML=`<div class="fe-row hd"><span>Date / Time</span><span>Type</span><span>Amount</span><span>TX</span></div>`+rowsEl.innerHTML;
-
-    // --- TOP HOLDERS (live) ---
     if(topHolders.length>0){
       const maxPct=topHolders[0]?parseInt(topHolders[0].amount||0)/totalSupply*100:9.5;
       const knownLabels={0:'Treasury',1:'Team'};
@@ -1143,14 +1090,10 @@ async function fetchStakingData(){
         </div>`;
       }).join('');
     }
-
-    // --- UPDATE PILL & TIMESTAMP ---
     const now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     if(pill)pill.innerHTML='<div class="live-dot" style="width:6px;height:6px;margin-right:0;"></div>LIVE · '+now;
     const lu=document.getElementById('stk-lastupdate');
     if(lu)lu.textContent='Updated '+now;
-
-    // Also refresh the FEE DISTRIBUTION tab with same data
     const fList=document.getElementById('feeList');
     if(fList)fList.innerHTML=`<div class="fe-row hd"><span>Date</span><span>Type</span><span>Amount</span><span>TX</span></div>`
       +rowsToShow.map(row=>{
@@ -1163,7 +1106,6 @@ async function fetchStakingData(){
           <a href="https://solscan.io/tx/${row.sig}" target="_blank" class="tx-a">${shortSig} ↗</a>
         </div>`;
       }).join('');
-
   }catch(err){
     console.error('Staking fetch error',err);
     const pill=document.getElementById('stk-pill');
@@ -1172,27 +1114,21 @@ async function fetchStakingData(){
   }
 }
 
-// ---- LIVE TRADE HISTORY (from Helius enhanced txs) ----
 async function fetchLiveTrades(){
   try{
     const txs=await fetchTokenTransactions();
     const swaps=txs.filter(tx=>tx.type==='SWAP'||tx.type==='TRANSFER'||(tx.tokenTransfers&&tx.tokenTransfers.length>0));
-
     if(swaps.length===0)throw new Error('no swaps');
-
     document.getElementById('tradeBody').innerHTML=swaps.slice(0,10).map(tx=>{
-      // Determine buy vs sell by token transfer direction
       const tt=tx.tokenTransfers||[];
       const allinTransfer=tt.find(t=>t.mint===CA);
       const isBuy=allinTransfer&&allinTransfer.toUserAccount&&allinTransfer.toUserAccount!==BLANK_FEE_SPLITTER;
       const type=isBuy?'BUY':'SELL';
-
       const nativeT=tx.nativeTransfers||[];
       const solAmt=nativeT.reduce((s,t)=>s+t.amount/1e9,0);
       const allinAmt=allinTransfer?parseInt(allinTransfer.tokenAmount||0):0;
       const traderAddr=tx.feePayer?shortAddr(tx.feePayer):'—';
       const shortSig=tx.signature?tx.signature.slice(0,8)+'...':'—';
-
       return `<tr>
         <td><span class="badge ${type.toLowerCase()}">${type}</span></td>
         <td class="addr-muted">${traderAddr}</td>
@@ -1203,7 +1139,6 @@ async function fetchLiveTrades(){
       </tr>`;
     }).join('');
   }catch(e){
-    // Fallback to static trades
     const trades=[
       {type:'SELL',addr:'5v6K...Gr4t',sol:'0.1144',allin:'161.69K',time:'7m ago',tx:'3Td2T...'},
       {type:'SELL',addr:'9Jah...FMxg',sol:'0.0470',allin:'66.31K',time:'10m ago',tx:'5Bkkd...'},
