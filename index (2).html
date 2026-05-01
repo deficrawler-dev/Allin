@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>$ALLIN — You've Only Got 1 Shot</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0a0a0a; --surface:#111; --surface2:#1a1a1a; --surface3:#272727;
+  --accent:#b5f23d; --accent-dim:#8abf2e;
+  --text:#f0f0f0; --text2:#aaa; --muted:#666;
+  --border:#2a2a2a; --border2:#3a3a3a;
+  --red:#ff4040; --green:#3dff7a;
+  --btn-shadow:#b5f23d; --nav-bg:rgba(10,10,10,0.95);
+}
+body.blank-mode {
+  --bg:#f5f5f0; --surface:#fff; --surface2:#f0f0eb; --surface3:#e5e5e0;
+  --accent:#000; --accent-dim:#333;
+  --text:#000; --text2:#444; --muted:#888;
+  --border:#d0d0c8; --border2:#b0b0a0;
+  --red:#d42020; --green:#18a854;
+  --btn-shadow:#c8e845; --nav-bg:rgba(245,245,240,0.96);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;transition:background .3s,color .3s;overflow-x:hidden;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px;}
+
+/* ---- BLANK BUTTONS with offset shadow ---- */
+.btn-blank{
+  display:inline-block;padding:11px 26px;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;letter-spacing:.3px;
+  cursor:pointer;text-decoration:none;
+  border:2px solid var(--text);background:var(--text);color:var(--bg);
+  box-shadow:4px 4px 0 var(--btn-shadow);
+  transition:box-shadow .12s,transform .12s;white-space:nowrap;
+}
+.btn-blank:hover{box-shadow:2px 2px 0 var(--btn-shadow);transform:translate(2px,2px);}
+.btn-blank:active{box-shadow:none;transform:translate(4px,4px);}
+
+.btn-outline{
+  display:inline-block;padding:11px 26px;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;letter-spacing:.3px;
+  cursor:pointer;text-decoration:none;
+  border:2px solid var(--text);background:transparent;color:var(--text);
+  box-shadow:4px 4px 0 var(--btn-shadow);
+  transition:box-shadow .12s,transform .12s;white-space:nowrap;
+}
+.btn-outline:hover{box-shadow:2px 2px 0 var(--btn-shadow);transform:translate(2px,2px);}
+.btn-outline:active{box-shadow:none;transform:translate(4px,4px);}
+
+/* ---- NAV ---- */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;height:62px;
+  display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;
+  background:var(--nav-bg);border-bottom:2px solid var(--border2);
+  backdrop-filter:blur(10px);transition:background .3s,border-color .3s;
+}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--accent);letter-spacing:4px;text-decoration:none;}
+.nav-links{display:flex;gap:1.5rem;list-style:none;}
+.nav-links a{color:var(--text2);text-decoration:none;font-size:13px;font-weight:600;transition:color .2s;}
+.nav-links a:hover{color:var(--text);}
+.nav-right{display:flex;align-items:center;gap:10px;}
+
+/* Theme toggle */
+.theme-toggle{
+  display:flex;border:2px solid var(--border2);overflow:hidden;
+  background:var(--surface2);box-shadow:3px 3px 0 var(--btn-shadow);transition:box-shadow .3s;
+}
+.t-opt{
+  padding:6px 13px;font-size:11px;font-weight:700;font-family:'Space Mono',monospace;letter-spacing:1px;
+  cursor:pointer;border:none;background:transparent;color:var(--muted);transition:background .2s,color .2s;
+}
+.t-opt.on{background:var(--text);color:var(--bg);}
+
+/* Hamburger */
+.hbg{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;}
+.hbg span{display:block;width:22px;height:2px;background:var(--text);transition:background .3s;}
+
+/* Mobile menu */
+.mob-nav{
+  display:none;position:fixed;top:62px;left:0;right:0;
+  background:var(--surface);border-bottom:2px solid var(--border2);
+  padding:1.25rem 1.5rem;z-index:199;flex-direction:column;gap:.75rem;
+}
+.mob-nav.open{display:flex;}
+.mob-nav a{color:var(--text);text-decoration:none;font-size:15px;font-weight:600;padding:7px 0;border-bottom:1px solid var(--border);}
+.mob-theme{display:flex;align-items:center;gap:8px;padding-top:6px;}
+.mob-theme-lbl{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:1px;}
+
+@media(max-width:860px){.nav-links{display:none;}.hbg{display:flex;}}
+@media(max-width:480px){.theme-toggle{display:none;}}
+
+/* ---- HERO ---- */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  padding:7rem 1.5rem 4rem;position:relative;overflow:hidden;
+}
+.hero-grid{
+  position:absolute;inset:0;pointer-events:none;opacity:.25;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:60px 60px;transition:opacity .3s;
+}
+.live-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  border:2px solid var(--border2);background:var(--surface);color:var(--text);
+  font-family:'Space Mono',monospace;font-size:11px;
+  padding:5px 14px;margin-bottom:2rem;letter-spacing:2px;text-transform:uppercase;
+  box-shadow:3px 3px 0 var(--btn-shadow);
+}
+.live-dot{width:7px;height:7px;background:var(--accent);border-radius:50%;animation:blink 1.4s infinite;flex-shrink:0;}
+body.blank-mode .live-dot{background:#18a854;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+.hero h1{
+  font-family:'Bebas Neue',sans-serif;font-size:clamp(88px,20vw,210px);
+  line-height:.85;letter-spacing:10px;color:var(--text);transition:color .3s;
+}
+.hero h1 em{color:var(--accent);font-style:normal;}
+body.blank-mode .hero h1 em{color:#000;}
+
+.hero-tag{
+  font-family:'Space Mono',monospace;font-size:clamp(12px,1.8vw,16px);
+  color:var(--text2);letter-spacing:3px;text-transform:uppercase;margin:1.5rem 0 2.5rem;
+}
+
+.ca-box{
+  display:flex;align-items:center;border:2px solid var(--text);
+  max-width:640px;width:100%;margin:0 auto 2.5rem;
+  box-shadow:4px 4px 0 var(--btn-shadow);
+}
+.ca-label{
+  font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);
+  letter-spacing:2px;padding:0 .75rem;white-space:nowrap;border-right:2px solid var(--border2);
+}
+.ca-addr{
+  font-family:'Space Mono',monospace;font-size:11px;color:var(--text);
+  flex:1;padding:12px .75rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  background:var(--surface);
+}
+.ca-copy{
+  padding:14px 16px;background:var(--text);color:var(--bg);border:none;border-left:2px solid var(--text);
+  font-family:'Space Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1px;
+  transition:background .2s;flex-shrink:0;
+}
+.ca-copy:hover{background:var(--accent);color:#000;}
+
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+
+/* ---- TICKER ---- */
+.ticker{
+  background:var(--text);color:var(--bg);padding:10px 0;
+  overflow:hidden;border-top:2px solid var(--border2);border-bottom:2px solid var(--border2);
+}
+.ticker-inner{display:flex;gap:3rem;white-space:nowrap;animation:tick 35s linear infinite;}
+@keyframes tick{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.t-item{font-family:'Space Mono',monospace;font-size:12px;display:flex;align-items:center;gap:8px;}
+.t-lbl{opacity:.45;font-size:10px;letter-spacing:1px;}
+.t-up{color:#3dff7a;} body.blank-mode .t-up{color:#18a854;}
+.t-dn{color:#ff6060;} body.blank-mode .t-dn{color:#d42020;}
+.t-sep{opacity:.25;}
+
+/* ---- SECTIONS ---- */
+.section{max-width:1160px;margin:0 auto;padding:5rem 1.5rem;}
+.eyebrow{font-family:'Space Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:.4rem;}
+body.blank-mode .eyebrow{color:#888;}
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,7vw,72px);letter-spacing:4px;line-height:1;margin-bottom:2.5rem;}
+.divider{height:2px;background:var(--border);max-width:1160px;margin:0 auto;}
+
+/* ---- STATS ---- */
+.stats-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  border:2px solid var(--border2);box-shadow:5px 5px 0 var(--btn-shadow);
+}
+.s-card{padding:1.75rem;border-right:2px solid var(--border2);border-bottom:2px solid var(--border2);background:var(--surface);transition:background .2s;}
+.s-card:hover{background:var(--surface2);}
+.s-lbl{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:.6rem;}
+.s-val{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:2px;line-height:1;}
+.s-sub{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:5px;}
+.up{color:var(--green);} .dn{color:var(--red);}
+
+/* ---- STAKING ---- */
+.stk-wrap{border:2px solid var(--border2);box-shadow:5px 5px 0 var(--btn-shadow);background:var(--surface);}
+.stk-head{padding:1.25rem 1.5rem;border-bottom:2px solid var(--border2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.stk-heading{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;}
+.live-pill{display:flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:2px;border:1px solid var(--accent);padding:4px 10px;}
+body.blank-mode .live-pill{color:#18a854;border-color:#18a854;}
+.stk-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));border-bottom:2px solid var(--border2);}
+.stk-cell{padding:1.5rem;border-right:2px solid var(--border2);}
+.stk-cell:last-child{border-right:none;}
+.sk-lbl{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.sk-val{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:2px;color:var(--accent);line-height:1;}
+body.blank-mode .sk-val{color:#000;}
+.sk-sub{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:5px;}
+.stk-fees{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));border-bottom:2px solid var(--border2);}
+.f-cell{padding:1.25rem 1.5rem;border-right:2px solid var(--border2);}
+.f-cell:last-child{border-right:none;}
+.f-lbl{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.f-val{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;line-height:1;}
+.f-bar{height:5px;background:var(--surface3);margin-top:10px;}
+.f-fill{height:100%;background:var(--accent);}
+.stk-note{padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.stk-note-txt{font-size:13px;color:var(--text2);line-height:1.6;max-width:560px;}
+.stk-note-txt strong{color:var(--accent);}
+body.blank-mode .stk-note-txt strong{color:#000;}
+.data-note{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);padding:8px 1.5rem;border-top:1px solid var(--border);letter-spacing:1px;}
+
+/* ---- TABS ---- */
+.tabs-wrap{border:2px solid var(--border2);box-shadow:5px 5px 0 var(--btn-shadow);background:var(--surface);}
+.tabs-bar{display:flex;border-bottom:2px solid var(--border2);overflow-x:auto;}
+.tab-btn{
+  padding:14px 20px;font-size:13px;font-weight:700;cursor:pointer;
+  border:none;background:transparent;color:var(--muted);white-space:nowrap;
+  border-right:2px solid var(--border2);transition:background .15s,color .15s;
+}
+.tab-btn.on{background:var(--text);color:var(--bg);}
+.tab-btn:hover:not(.on){background:var(--surface2);color:var(--text);}
+.tab-pane{display:none;}
+.tab-pane.on{display:block;}
+
+/* data tables */
+.dt{width:100%;border-collapse:collapse;font-family:'Space Mono',monospace;font-size:12px;}
+.dt th{text-align:left;padding:10px 16px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);background:var(--surface2);border-bottom:2px solid var(--border2);}
+.dt td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text);}
+.dt tr:hover td{background:var(--surface2);}
+.dt tr:last-child td{border-bottom:none;}
+
+.badge{display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:1px;font-family:'Space Mono',monospace;}
+.badge.buy{background:rgba(61,255,122,.15);color:var(--green);border:1px solid var(--green);}
+.badge.sell{background:rgba(255,64,64,.15);color:var(--red);border:1px solid var(--red);}
+body.blank-mode .badge.buy{background:rgba(24,168,84,.12);color:#18a854;border-color:#18a854;}
+body.blank-mode .badge.sell{background:rgba(212,32,32,.12);color:#d42020;border-color:#d42020;}
+
+.addr-muted{color:var(--muted);}
+.tx-a{color:var(--accent);text-decoration:none;font-size:11px;}
+.tx-a:hover{text-decoration:underline;}
+body.blank-mode .tx-a{color:#000;}
+
+.tab-foot{padding:12px 16px;border-top:2px solid var(--border2);font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);display:flex;gap:1.5rem;}
+
+/* comments */
+.c-list{padding:0 1.5rem;}
+.c-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);}
+.c-item:last-child{border-bottom:none;}
+.c-av{width:36px;height:36px;background:var(--surface3);border:2px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;color:var(--text2);}
+.c-name{font-size:13px;font-weight:600;}
+.c-time{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-left:8px;}
+.c-txt{font-size:13px;color:var(--text2);margin-top:4px;line-height:1.6;}
+
+/* holders */
+.h-row{display:grid;grid-template-columns:36px 1fr 100px;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);}
+.h-row:last-child{border-bottom:none;}
+.h-rank{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--muted);text-align:center;}
+.h-addr{font-family:'Space Mono',monospace;font-size:12px;color:var(--text2);}
+.h-pct{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--accent);text-align:right;}
+body.blank-mode .h-pct{color:#000;}
+.h-bar{height:3px;background:var(--surface3);border-radius:2px;margin-top:5px;overflow:hidden;}
+.h-fill{height:100%;background:var(--accent);}
+body.blank-mode .h-fill{background:#000;}
+
+/* fee dist */
+.fe-row{display:grid;grid-template-columns:1fr 100px 120px 110px;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);font-size:12px;font-family:'Space Mono',monospace;}
+.fe-row:last-child{border-bottom:none;}
+.fe-row.hd{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);background:var(--surface2);border-bottom:2px solid var(--border2);}
+.fe-badge{display:inline-block;padding:3px 10px;font-size:10px;font-weight:700;letter-spacing:1px;background:rgba(181,242,61,.15);color:var(--accent);border:1px solid var(--accent);}
+body.blank-mode .fe-badge{background:#f0f0eb;color:#000;border-color:#000;}
+
+/* ---- TOKENOMICS ---- */
+.tok-alloc{margin-bottom:2rem;border:2px solid var(--border2);padding:1.25rem;background:var(--surface);box-shadow:5px 5px 0 var(--btn-shadow);}
+.alloc-legend{display:flex;gap:1.5rem;margin-bottom:10px;font-family:'Space Mono',monospace;font-size:11px;flex-wrap:wrap;}
+.alloc-bar{height:22px;background:var(--surface3);display:flex;border:1px solid var(--border2);}
+.alloc-seg-a{background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#000;font-family:'Space Mono',monospace;}
+.alloc-seg-b{flex:1;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;}
+
+.tok-grid{display:grid;grid-template-columns:1fr 1fr;border:2px solid var(--border2);box-shadow:5px 5px 0 var(--btn-shadow);}
+.tok-cell{padding:2rem;background:var(--surface);border-right:2px solid var(--border2);border-bottom:2px solid var(--border2);}
+.tok-lbl{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:.6rem;}
+.tok-val{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--accent);letter-spacing:2px;}
+body.blank-mode .tok-val{color:#000;}
+.tok-note{font-size:13px;color:var(--text2);margin-top:8px;line-height:1.6;}
+.vest-block{border:2px solid var(--border2);margin-top:1rem;padding:.75rem 1rem;background:var(--surface2);}
+.vest-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12px;color:var(--muted);}
+.vest-dates{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;}
+.vd{border:1px solid var(--border2);padding:8px;background:var(--surface);}
+.vd-l{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.vd-v{font-size:13px;font-weight:600;margin-top:3px;}
+
+/* ---- HOW TO BUY ---- */
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));border:2px solid var(--border2);box-shadow:5px 5px 0 var(--btn-shadow);}
+.step{padding:2rem;background:var(--surface);border-right:2px solid var(--border2);position:relative;overflow:hidden;}
+.step:last-child{border-right:none;}
+.step-n{font-family:'Bebas Neue',sans-serif;font-size:70px;color:var(--surface3);line-height:1;position:absolute;top:.5rem;right:1rem;user-select:none;}
+.step-t{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;margin-bottom:.6rem;}
+.step-d{font-size:13px;color:var(--text2);line-height:1.7;}
+.step-a{display:inline-block;margin-top:1rem;color:var(--accent);font-family:'Space Mono',monospace;font-size:11px;text-decoration:none;letter-spacing:1px;border-bottom:1px solid var(--accent);padding-bottom:1px;}
+body.blank-mode .step-a{color:#000;border-color:#000;}
+
+/* ---- COMMUNITY ---- */
+.comm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
+.comm-card{display:flex;align-items:center;gap:14px;padding:1.25rem;background:var(--surface);border:2px solid var(--border2);text-decoration:none;color:var(--text);box-shadow:4px 4px 0 var(--btn-shadow);transition:box-shadow .12s,transform .12s;}
+.comm-card:hover{box-shadow:2px 2px 0 var(--btn-shadow);transform:translate(2px,2px);}
+.comm-icon{width:44px;height:44px;background:var(--text);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.comm-icon svg{fill:var(--bg);}
+.comm-name{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;}
+.comm-sub{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;margin-top:2px;}
+
+/* ---- FOOTER ---- */
+footer{border-top:2px solid var(--border2);padding:3rem 1.5rem;text-align:center;}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:56px;color:var(--accent);letter-spacing:8px;display:block;margin-bottom:.75rem;}
+body.blank-mode .footer-logo{color:#000;}
+.footer-sub{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:2px;line-height:2;}
+.disclaimer{max-width:580px;margin:2rem auto 0;font-size:11px;color:var(--muted);line-height:1.7;opacity:.6;}
+
+@media(max-width:640px){
+  .tok-grid{grid-template-columns:1fr;}
+  .h-row{grid-template-columns:36px 1fr 80px;}
+  .fe-row{grid-template-columns:1fr 80px 90px;font-size:11px;}
+  .vest-dates{grid-template-columns:1fr;}
+  .stk-fees{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">$ALLIN</a>
+  <ul class="nav-links">
+    <li><a href="#stats">Live Data</a></li>
+    <li><a href="#staking">Staking</a></li>
+    <li><a href="#activity">Activity</a></li>
+    <li><a href="#tokenomics">Tokenomics</a></li>
+    <li><a href="#buy">How to Buy</a></li>
+    <li><a href="#community">Community</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="theme-toggle">
+      <button class="t-opt on" id="tDark" onclick="setTheme('dark')">DARK</button>
+      <button class="t-opt" id="tBlank" onclick="setTheme('blank')">BLANK</button>
+    </div>
+    <a href="https://blank.build/token/aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK" target="_blank" class="btn-blank" style="font-size:13px;padding:9px 20px;">BUY NOW</a>
+    <button class="hbg" id="hbg" onclick="toggleMob()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile nav -->
+<div class="mob-nav" id="mobNav">
+  <a href="#stats" onclick="closeMob()">Live Data</a>
+  <a href="#staking" onclick="closeMob()">Staking</a>
+  <a href="#activity" onclick="closeMob()">Activity</a>
+  <a href="#tokenomics" onclick="closeMob()">Tokenomics</a>
+  <a href="#buy" onclick="closeMob()">How to Buy</a>
+  <a href="#community" onclick="closeMob()">Community</a>
+  <div class="mob-theme">
+    <span class="mob-theme-lbl">THEME:</span>
+    <button class="t-opt on" id="mtDark" onclick="setTheme('dark');closeMob()">DARK</button>
+    <button class="t-opt" id="mtBlank" onclick="setTheme('blank');closeMob()">BLANK</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="live-badge">
+    <div class="live-dot"></div>
+    SOL · GRADUATED · LIVE ON BLANK
+  </div>
+  <h1>ALL<em>IN</em></h1>
+  <p class="hero-tag">You've only got 1 shot. Might as well go all in.</p>
+  <div class="ca-box">
+    <span class="ca-label">CA</span>
+    <span class="ca-addr">aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK</span>
+    <button class="ca-copy" onclick="copyCA()">COPY</button>
+  </div>
+  <div class="hero-btns">
+    <a href="https://blank.build/token/aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK" target="_blank" class="btn-blank">BUY $ALLIN</a>
+    <a href="https://blank.build/token/aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK" target="_blank" class="btn-outline">STAKE & EARN</a>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner" id="tickInner">
+    <span class="t-item"><span class="t-lbl">PRICE</span><span id="tp1">—</span><span id="tc1" class="t-up">—</span></span>
+    <span class="t-sep">///</span>
+    <span class="t-item"><span class="t-lbl">MKT CAP</span><span id="tm1">$59.39K</span></span>
+    <span class="t-sep">///</span>
+    <span class="t-item"><span class="t-lbl">24H VOL</span><span id="tv1">$148.29K</span></span>
+    <span class="t-sep">///</span>
+    <span class="t-item"><span class="t-lbl">STAKING APR</span><span class="t-up">827.51%</span></span>
+    <span class="t-sep">///</span>
+    <span class="t-item"><span class="t-lbl">STAKERS</span><span>154</span></span>
+    <span class="t-sep">///</span>
+    <span class="t-item"><span class="t-lbl">TOTAL FEES</span><span>134.7034 SOL</span></span>
+    <span class="t-sep">///</span>
+    <span class="t-item"><span class="t-lbl">HOLDERS</span><span id="th1">223</span></span>
+    <span class="t-sep">///</span>
+    <!-- dupe -->
+    <span class="t-item"><span class="t-lbl">PRICE</span><span id="tp2">—</span><span id="tc2" class="t-up">—</span></span>
+    <span class="t-sep">///</span>
+    <span class="t-item"><span class="t-lbl">MKT CAP</span><span id="tm2">$59.39K</span></span>
+    <span class="t-sep">///</span>
+    <span class="t-item"><span class="t-lbl">24H VOL</span><span id="tv2">$148.29K</span></span>
+    <span class="t-sep">///</span>
+    <span class="t-item"><span class="t-lbl">STAKING APR</span><span class="t-up">827.51%</span></span>
+    <span class="t-sep">///</span>
+    <span class="t-item"><span class="t-lbl">STAKERS</span><span>154</span></span>
+    <span class="t-sep">///</span>
+    <span class="t-item"><span class="t-lbl">TOTAL FEES</span><span>134.7034 SOL</span></span>
+    <span class="t-sep">///</span>
+    <span class="t-item"><span class="t-lbl">HOLDERS</span><span id="th2">223</span></span>
+    <span class="t-sep">///</span>
+  </div>
+</div>
+
+<!-- LIVE STATS -->
+<section class="section" id="stats">
+  <div class="eyebrow">Real-time · Updated every 30s via DexScreener</div>
+  <div class="sec-title">LIVE MARKET DATA</div>
+  <div class="stats-grid">
+    <div class="s-card">
+      <div class="s-lbl">Token Price</div>
+      <div class="s-val" id="sv-price">—</div>
+      <div class="s-sub" id="sv-psub">loading...</div>
+    </div>
+    <div class="s-card">
+      <div class="s-lbl">Market Cap</div>
+      <div class="s-val" id="sv-mkt">$59.39K</div>
+      <div class="s-sub">Fully diluted value</div>
+    </div>
+    <div class="s-card">
+      <div class="s-lbl">24h Volume</div>
+      <div class="s-val" id="sv-vol">$148.29K</div>
+      <div class="s-sub">Trading volume</div>
+    </div>
+    <div class="s-card">
+      <div class="s-lbl">Holders</div>
+      <div class="s-val" id="sv-hold">223</div>
+      <div class="s-sub">Active wallets</div>
+    </div>
+    <div class="s-card">
+      <div class="s-lbl">5m Change</div>
+      <div class="s-val" id="sv-5m">—</div>
+      <div class="s-sub" id="sv-1h">1h: loading...</div>
+    </div>
+    <div class="s-card">
+      <div class="s-lbl">6h Change</div>
+      <div class="s-val up" id="sv-6h">+11.13%</div>
+      <div class="s-sub" id="sv-24h">24h: —</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- STAKING -->
+<section class="section" id="staking">
+  <div class="eyebrow">Earn passive income</div>
+  <div class="sec-title">STAKING DASHBOARD</div>
+  <div class="stk-wrap">
+    <div class="stk-head">
+      <div class="stk-heading">STAKING OVERVIEW</div>
+      <div class="live-pill"><div class="live-dot" style="width:6px;height:6px;margin-right:0;"></div>SNAPSHOT FROM BLANK</div>
+    </div>
+    <div class="stk-metrics">
+      <div class="stk-cell"><div class="sk-lbl">Est. APR</div><div class="sk-val">827.51%</div><div class="sk-sub">Annual yield</div></div>
+      <div class="stk-cell"><div class="sk-lbl">Total Staked</div><div class="sk-val">299.73M</div><div class="sk-sub">$ALLIN tokens</div></div>
+      <div class="stk-cell"><div class="sk-lbl">Active Stakers</div><div class="sk-val">154</div><div class="sk-sub">Wallets staking</div></div>
+      <div class="stk-cell"><div class="sk-lbl">Staker Share</div><div class="sk-val">100%</div><div class="sk-sub">Of all trading fees</div></div>
+    </div>
+    <div class="stk-fees">
+      <div class="f-cell">
+        <div class="f-lbl">Total Fees Generated</div>
+        <div class="f-val">~134.7034 SOL</div>
+        <div class="sk-sub" style="margin-top:4px;">≈ $11,276.45 USD</div>
+        <div class="f-bar"><div class="f-fill" style="width:100%;"></div></div>
+      </div>
+      <div class="f-cell">
+        <div class="f-lbl">Staking Rewards Earned</div>
+        <div class="f-val">133.95 SOL</div>
+        <div class="sk-sub" style="margin-top:4px;">Distributed to stakers</div>
+        <div class="f-bar"><div class="f-fill" style="width:99.5%;"></div></div>
+      </div>
+      <div class="f-cell">
+        <div class="f-lbl">Creator Earnings</div>
+        <div class="f-val">0.7534 SOL</div>
+        <div class="sk-sub" style="margin-top:4px;">Platform creator cut</div>
+        <div class="f-bar"><div class="f-fill" style="width:.5%;background:var(--muted);"></div></div>
+      </div>
+    </div>
+    <div class="stk-note">
+      <p class="stk-note-txt">Stake your $ALLIN to earn a share of all trading fees. <strong>100% of rewards go to stakers.</strong> Higher volume = higher yield. The 827%+ APR reflects current activity.</p>
+      <a href="https://blank.build/token/aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK" target="_blank" class="btn-blank" style="font-size:12px;padding:9px 22px;">STAKE NOW</a>
+    </div>
+    <div class="data-note">⚠ Staking metrics are the latest snapshot from Blank. Price data auto-refreshes every 30s from DexScreener.</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ACTIVITY TABS -->
+<section class="section" id="activity">
+  <div class="eyebrow">On-chain activity</div>
+  <div class="sec-title">MARKET ACTIVITY</div>
+  <div class="tabs-wrap">
+    <div class="tabs-bar">
+      <button class="tab-btn on" onclick="showTab('trades',this)">TRADE HISTORY</button>
+      <button class="tab-btn" onclick="showTab('comments',this)">COMMENTS</button>
+      <button class="tab-btn" onclick="showTab('holders',this)">TOP HOLDERS</button>
+      <button class="tab-btn" onclick="showTab('fees',this)">FEE DISTRIBUTION</button>
+    </div>
+
+    <!-- TRADES -->
+    <div class="tab-pane on" id="tab-trades">
+      <div style="overflow-x:auto;">
+        <table class="dt">
+          <thead><tr><th>Type</th><th>Trader</th><th>SOL</th><th>$ALLIN</th><th>Time</th><th>TX</th></tr></thead>
+          <tbody id="tradeBody"></tbody>
+        </table>
+      </div>
+      <div class="tab-foot">
+        <span>Total: <strong style="color:var(--text)">10,597</strong></span>
+        <span class="up">Buys: 6,723</span>
+        <span class="dn">Sells: 3,874</span>
+      </div>
+    </div>
+
+    <!-- COMMENTS -->
+    <div class="tab-pane" id="tab-comments">
+      <div class="c-list" id="commentsList"></div>
+    </div>
+
+    <!-- HOLDERS -->
+    <div class="tab-pane" id="tab-holders">
+      <div id="holdersList"></div>
+    </div>
+
+    <!-- FEES -->
+    <div class="tab-pane" id="tab-fees">
+      <div id="feeList">
+        <div class="fe-row hd"><span>Date</span><span>Type</span><span>Amount</span><span>TX</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TOKENOMICS -->
+<section class="section" id="tokenomics">
+  <div class="eyebrow">Token distribution</div>
+  <div class="sec-title">TOKENOMICS</div>
+
+  <div class="tok-alloc">
+    <div style="font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:10px;">
+      Creator bought <strong style="color:var(--text)">1%</strong> of the <strong style="color:var(--text)">1B $ALLIN</strong> total supply
+    </div>
+    <div class="alloc-legend">
+      <span style="display:flex;align-items:center;gap:6px;"><span style="width:12px;height:12px;background:var(--accent);display:inline-block;"></span>9% Claimable</span>
+      <span style="display:flex;align-items:center;gap:6px;"><span style="width:12px;height:12px;background:var(--surface3);border:1px solid var(--border2);display:inline-block;"></span>91% Locked</span>
+      <span style="display:flex;align-items:center;gap:6px;"><span style="width:12px;height:12px;background:var(--muted);display:inline-block;"></span>0% Claimed</span>
+    </div>
+    <div class="alloc-bar">
+      <div class="alloc-seg-a" style="width:9%;">9%</div>
+      <div class="alloc-seg-b">91%</div>
+    </div>
+  </div>
+
+  <div class="tok-grid">
+    <div class="tok-cell">
+      <div class="tok-lbl">Team</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+        <span style="background:var(--text);color:var(--bg);font-size:11px;font-weight:700;padding:2px 8px;font-family:'Space Mono',monospace;">TEAM</span>
+        <span class="tok-val" style="font-size:30px;">5%</span>
+        <span style="font-size:13px;color:var(--text2);font-family:'Space Mono',monospace;">500K $ALLIN</span>
+      </div>
+      <div class="vest-block">
+        <div class="vest-top"><span>🔒 VESTING</span><strong style="font-family:'Space Mono',monospace;">0%</strong></div>
+        <div style="height:4px;background:var(--surface3);"><div style="width:0%;height:100%;background:var(--accent);"></div></div>
+        <div class="vest-dates">
+          <div class="vd"><div class="vd-l">Start</div><div class="vd-v">Apr 16, 2026</div></div>
+          <div class="vd"><div class="vd-l">Unlock (90D)</div><div class="vd-v">Jul 15, 2026</div></div>
+          <div class="vd"><div class="vd-l">Claimed</div><div class="vd-v">0 / 500K</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="tok-cell">
+      <div class="tok-lbl">Treasury</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+        <span style="background:#c8a020;color:#000;font-size:11px;font-weight:700;padding:2px 8px;font-family:'Space Mono',monospace;">TREASURY</span>
+        <span class="tok-val" style="font-size:30px;">95%</span>
+        <span style="font-size:13px;color:var(--text2);font-family:'Space Mono',monospace;">9.5M $ALLIN</span>
+      </div>
+      <div class="vest-block">
+        <div class="vest-top"><span>🔒 VESTING</span><strong style="font-family:'Space Mono',monospace;">0%</strong></div>
+        <div style="height:4px;background:var(--surface3);"><div style="width:0%;height:100%;background:#c8a020;"></div></div>
+        <div class="vest-dates">
+          <div class="vd"><div class="vd-l">Start</div><div class="vd-v">Apr 16, 2026</div></div>
+          <div class="vd"><div class="vd-l">Unlock (180D)</div><div class="vd-v">Oct 13, 2026</div></div>
+          <div class="vd"><div class="vd-l">Claimed</div><div class="vd-v">0 / 9.5M</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="tok-cell">
+      <div class="tok-lbl">Status</div>
+      <div class="tok-val" style="color:var(--green);font-size:36px;">GRADUATED</div>
+      <p class="tok-note">$ALLIN has graduated from Blank and is now live on Meteora. Strong community with 223+ holders.</p>
+    </div>
+    <div class="tok-cell">
+      <div class="tok-lbl">Fee Model</div>
+      <div class="tok-val" style="font-size:36px;">100%</div>
+      <p class="tok-note">All trading fees go directly to $ALLIN stakers on-chain. Fully transparent via Blank protocol.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- HOW TO BUY -->
+<section class="section" id="buy">
+  <div class="eyebrow">Get started</div>
+  <div class="sec-title">HOW TO BUY</div>
+  <div class="steps-grid">
+    <div class="step">
+      <div class="step-n">01</div>
+      <div class="step-t">GET A WALLET</div>
+      <p class="step-d">Download Phantom or Solflare. Create your account and store your seed phrase securely. Never share it.</p>
+      <a href="https://phantom.app" target="_blank" class="step-a">Get Phantom →</a>
+    </div>
+    <div class="step">
+      <div class="step-n">02</div>
+      <div class="step-t">BUY SOL</div>
+      <p class="step-d">Purchase SOL on Coinbase, Binance, or Kraken. Transfer it to your Phantom wallet address.</p>
+      <a href="https://coinbase.com" target="_blank" class="step-a">Buy on Coinbase →</a>
+    </div>
+    <div class="step">
+      <div class="step-n">03</div>
+      <div class="step-t">CONNECT & BUY</div>
+      <p class="step-d">Go to Blank, connect your wallet, and buy $ALLIN with SOL. Use 1% slippage for smooth execution.</p>
+      <a href="https://blank.build/token/aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK" target="_blank" class="step-a">Buy on Blank →</a>
+    </div>
+    <div class="step">
+      <div class="step-n">04</div>
+      <div class="step-t">STAKE & EARN</div>
+      <p class="step-d">Stake your $ALLIN tokens on Blank to earn 827%+ APR from all trading fees. 100% to stakers.</p>
+      <a href="https://blank.build/token/aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK" target="_blank" class="step-a">Stake Now →</a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- COMMUNITY -->
+<section class="section" id="community">
+  <div class="eyebrow">Join the movement</div>
+  <div class="sec-title">COMMUNITY</div>
+  <div class="comm-grid">
+    <a href="https://twitter.com/allinblnk" target="_blank" class="comm-card">
+      <div class="comm-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.736l7.74-8.855L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </div>
+      <div><div class="comm-name">TWITTER / X</div><div class="comm-sub">@allinblnk</div></div>
+    </a>
+    <a href="https://t.me/blankerssol" target="_blank" class="comm-card">
+      <div class="comm-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+      </div>
+      <div><div class="comm-name">TELEGRAM</div><div class="comm-sub">t.me/blankerssol</div></div>
+    </a>
+    <a href="https://dexscreener.com/solana/aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK" target="_blank" class="comm-card">
+      <div class="comm-icon" style="background:var(--surface3);">
+        <svg width="20" height="20" viewBox="0 0 24 24" style="fill:var(--accent);"><path d="M3 3h18v2H3zm0 4h12v2H3zm0 4h18v2H3zm0 4h12v2H3zm0 4h18v2H3z"/></svg>
+      </div>
+      <div><div class="comm-name">DEXSCREENER</div><div class="comm-sub">Live chart & data</div></div>
+    </a>
+    <a href="https://blank.build/token/aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK" target="_blank" class="comm-card">
+      <div class="comm-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+      </div>
+      <div><div class="comm-name">BLANK</div><div class="comm-sub">Buy & stake $ALLIN</div></div>
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">$ALLIN</span>
+  <p class="footer-sub">YOU'VE ONLY GOT 1 SHOT.<br>MIGHT AS WELL GO ALL IN.</p>
+  <p class="disclaimer">Not financial advice. Crypto investments are highly speculative. Only invest what you can afford to lose. $ALLIN is a community token on Solana. Always DYOR.</p>
+</footer>
+
+<script>
+const CA='aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK';
+
+// THEME
+function setTheme(t){
+  document.body.classList.toggle('blank-mode',t==='blank');
+  ['tDark','mtDark'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.toggle('on',t==='dark');});
+  ['tBlank','mtBlank'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.toggle('on',t==='blank');});
+  try{localStorage.setItem('allin-theme',t);}catch(e){}
+}
+try{const s=localStorage.getItem('allin-theme');if(s==='blank')setTheme('blank');}catch(e){}
+
+// MOBILE MENU
+function toggleMob(){document.getElementById('mobNav').classList.toggle('open');}
+function closeMob(){document.getElementById('mobNav').classList.remove('open');}
+
+// COPY CA
+function copyCA(){
+  navigator.clipboard.writeText(CA).then(()=>{
+    const b=document.querySelector('.ca-copy');
+    b.textContent='COPIED!';b.style.background='var(--accent)';b.style.color='#000';
+    setTimeout(()=>{b.textContent='COPY';b.style.background='';b.style.color='';},2000);
+  }).catch(()=>{});
+}
+
+// TABS
+function showTab(key,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('on'));
+  document.getElementById('tab-'+key).classList.add('on');
+}
+
+// FORMAT
+function fmtUSD(n){if(n>=1e6)return'$'+(n/1e6).toFixed(2)+'M';if(n>=1e3)return'$'+(n/1e3).toFixed(2)+'K';return'$'+n.toFixed(2);}
+function fmtPrice(n){if(!n||isNaN(n))return'—';if(n<1e-6)return'$'+n.toExponential(4);if(n<0.001)return'$'+n.toFixed(8);if(n<1)return'$'+n.toFixed(6);return'$'+n.toFixed(4);}
+function signedPct(v){return(v>=0?'+':'')+v.toFixed(2)+'%';}
+function cls(v){return v>=0?'up':'dn';}
+
+// DEXSCREENER LIVE FEED
+async function fetchPrice(){
+  try{
+    const r=await fetch('https://api.dexscreener.com/latest/dex/tokens/'+CA);
+    const d=await r.json();
+    if(!d.pairs||!d.pairs.length)return;
+    const pair=d.pairs.sort((a,b)=>(b.liquidity?.usd||0)-(a.liquidity?.usd||0))[0];
+    const price=parseFloat(pair.priceUsd||0);
+    const mkt=pair.fdv||pair.marketCap||0;
+    const vol=pair.volume?.h24||0;
+    const c5=pair.priceChange?.m5; const c1=pair.priceChange?.h1;
+    const c6=pair.priceChange?.h6; const c24=pair.priceChange?.h24;
+    const ps=fmtPrice(price); const cs=c24!==undefined?signedPct(c24):'—';
+    const cc=c24>=0?'t-up':'t-dn';
+
+    document.getElementById('sv-price').textContent=ps;
+    document.getElementById('sv-price').className='s-val';
+    document.getElementById('sv-psub').innerHTML=c24!==undefined?`<span class="${cls(c24)}">${cs} (24h)</span>`:'—';
+    document.getElementById('sv-mkt').textContent=fmtUSD(mkt);
+    document.getElementById('sv-vol').textContent=fmtUSD(vol);
+    if(c5!==undefined){const e=document.getElementById('sv-5m');e.textContent=signedPct(c5);e.className='s-val '+cls(c5);}
+    if(c1!==undefined)document.getElementById('sv-1h').innerHTML='1h: <span class="'+cls(c1)+'">'+signedPct(c1)+'</span>';
+    if(c6!==undefined){const e=document.getElementById('sv-6h');e.textContent=signedPct(c6);e.className='s-val '+cls(c6);}
+    if(c24!==undefined)document.getElementById('sv-24h').innerHTML='24h: <span class="'+cls(c24)+'">'+signedPct(c24)+'</span>';
+
+    ['1','2'].forEach(i=>{
+      document.getElementById('tp'+i).textContent=ps;
+      const tc=document.getElementById('tc'+i);tc.textContent=cs;tc.className=cc;
+      document.getElementById('tm'+i).textContent=fmtUSD(mkt);
+      document.getElementById('tv'+i).textContent=fmtUSD(vol);
+    });
+  }catch(e){console.warn('DexScreener error',e);}
+}
+fetchPrice();
+setInterval(fetchPrice,30000);
+
+// TRADE DATA
+const trades=[
+  {type:'SELL',addr:'5v6K...Gr4t',sol:'0.1144',allin:'161.69K',time:'7m ago',tx:'3Td2T...'},
+  {type:'SELL',addr:'9Jah...FMxg',sol:'0.0470',allin:'66.31K',time:'10m ago',tx:'5Bkkd...'},
+  {type:'SELL',addr:'5J6L...ZFZt',sol:'0.0492',allin:'69.31K',time:'29m ago',tx:'4Ur32...'},
+  {type:'SELL',addr:'EEjA...sE9V',sol:'1.4387',allin:'2M',time:'29m ago',tx:'5ACru...'},
+  {type:'BUY', addr:'5yBo...UwEB',sol:'0.9990',allin:'1.33M',time:'36m ago',tx:'4B9jr...'},
+  {type:'BUY', addr:'3Cgv...sRoD',sol:'2.0793',allin:'2.86M',time:'37m ago',tx:'2QJ1X...'},
+  {type:'BUY', addr:'3LoA...zd76',sol:'7.2746',allin:'9.27M',time:'1h ago',tx:'2Wg44...'},
+];
+document.getElementById('tradeBody').innerHTML=trades.map(t=>`
+  <tr>
+    <td><span class="badge ${t.type.toLowerCase()}">${t.type}</span></td>
+    <td class="addr-muted">${t.addr}</td>
+    <td>${t.sol}</td>
+    <td>${t.allin}</td>
+    <td style="color:var(--muted)">${t.time}</td>
+    <td><a href="https://solscan.io/tx/${t.tx}" target="_blank" class="tx-a">${t.tx} ↗</a></td>
+  </tr>`).join('');
+
+// COMMENTS
+const comments=[
+  {user:'ALLIN',time:'2h ago',txt:'Happy ATH day to those who celebrate 🎉 Keep staking, keep earning. We are just getting started!',init:'AL'},
+  {user:'blanker99',time:'4h ago',txt:'Staked 5M tokens last week, already earning nice SOL rewards daily. This tokenomics model is 🔥',init:'BL'},
+  {user:'sol_degen',time:'6h ago',txt:'Best APR in the Blank ecosystem rn. 827% is insane for a graduated token.',init:'SD'},
+  {user:'cryptowatcher',time:'12h ago',txt:'Volume is picking up again. Watching those charts closely 👀',init:'CW'},
+  {user:'moonbagger',time:'1d ago',txt:'You only got 1 shot... I took mine at 10K market cap. Feeling good.',init:'MB'},
+];
+document.getElementById('commentsList').innerHTML=comments.map(c=>`
+  <div class="c-item">
+    <div class="c-av">${c.init}</div>
+    <div>
+      <span class="c-name">${c.user}</span><span class="c-time">${c.time}</span>
+      <p class="c-txt">${c.txt}</p>
+    </div>
+  </div>`).join('');
+
+// TOP HOLDERS
+const holders=[
+  {r:1,addr:'4dSm...knWj',pct:'9.50',note:'Treasury'},
+  {r:2,addr:'7nP7...Kuga',pct:'5.00',note:'Team'},
+  {r:3,addr:'3LoA...zd76',pct:'3.21',note:''},
+  {r:4,addr:'5yBo...UwEB',pct:'2.87',note:''},
+  {r:5,addr:'EEjA...sE9V',pct:'2.44',note:''},
+  {r:6,addr:'9Jah...FMxg',pct:'1.98',note:''},
+  {r:7,addr:'3Cgv...sRoD',pct:'1.76',note:''},
+  {r:8,addr:'5v6K...Gr4t',pct:'1.52',note:''},
+  {r:9,addr:'5J6L...ZFZt',pct:'1.31',note:''},
+  {r:10,addr:'4cZJ...y7ab',pct:'1.10',note:''},
+];
+document.getElementById('holdersList').innerHTML=holders.map(h=>`
+  <div class="h-row">
+    <div class="h-rank">#${h.r}</div>
+    <div>
+      <div class="h-addr">${h.addr}${h.note?` <span style="font-size:10px;color:var(--accent);font-family:'Space Mono',monospace;">(${h.note})</span>`:''}</div>
+      <div class="h-bar"><div class="h-fill" style="width:${(h.pct/9.5*100).toFixed(1)}%;"></div></div>
+    </div>
+    <div class="h-pct">${h.pct}%</div>
+  </div>`).join('');
+
+// FEE DISTRIBUTION (real data from your screenshot)
+const fees=[
+  {date:'May 1, 2026, 8:01 AM',type:'STAKING',amount:'0.0903 SOL',tx:'92PUH...'},
+  {date:'May 1, 2026, 7:46 AM',type:'STAKING',amount:'0.3961 SOL',tx:'3Vjfn...'},
+  {date:'May 1, 2026, 6:37 AM',type:'STAKING',amount:'0.0524 SOL',tx:'4MfCZ...'},
+  {date:'May 1, 2026, 5:40 AM',type:'STAKING',amount:'0.0088 SOL',tx:'592qR...'},
+  {date:'May 1, 2026, 5:01 AM',type:'STAKING',amount:'0.0009 SOL',tx:'4j9Bl...'},
+  {date:'May 1, 2026, 3:47 AM',type:'STAKING',amount:'0.0159 SOL',tx:'5hNY3...'},
+  {date:'May 1, 2026, 2:50 AM',type:'STAKING',amount:'0.0212 SOL',tx:'2RzFi...'},
+  {date:'May 1, 2026, 1:36 AM',type:'STAKING',amount:'0.0435 SOL',tx:'jJpSQ...'},
+  {date:'May 1, 2026, 1:02 AM',type:'STAKING',amount:'0.0331 SOL',tx:'4cZJy...'},
+];
+const fList=document.getElementById('feeList');
+fList.innerHTML=`<div class="fe-row hd"><span>Date</span><span>Type</span><span>Amount</span><span>TX</span></div>`
+  +fees.map(f=>`
+  <div class="fe-row">
+    <span style="color:var(--text2);font-size:11px;">${f.date}</span>
+    <span><span class="fe-badge">${f.type}</span></span>
+    <span style="font-weight:700;">${f.amount}</span>
+    <a href="https://solscan.io/tx/${f.tx}" target="_blank" class="tx-a">${f.tx} ↗</a>
+  </div>`).join('');
+</script>
+</body>
+</html>
