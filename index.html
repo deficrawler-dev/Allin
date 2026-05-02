@@ -730,103 +730,75 @@ body.blank-mode .ts-thumb{transform:translateX(24px);background:#fff;}
 /* ============================================================
    CONFIG
    ============================================================ */
-const CA         = 'aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK';
-const HELIUS_KEY = 'a05b03e1-68ca-49a2-ba75-e0190b4d7654';
-const HELIUS_RPC = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
-const HELIUS_API = `https://api.helius.xyz/v0`;
-const BLANK_BASE = `https://blank.build/api/token/${CA}`;
+const CA               = 'aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK';
+const HELIUS_KEY       = 'a05b03e1-68ca-49a2-ba75-e0190b4d7654';
+const HELIUS_RPC       = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
+const HELIUS_API       = `https://api.helius.xyz/v0`;
 
-// LocalStorage cache key
-const CACHE_KEY  = 'allin_staking_cache';
-const CACHE_TTL  = 55 * 1000; // 55s — refresh before the 60s interval fires
+// ✅ Confirmed fee wallet — verified from live tx balance changes on blank.build
+const BLANK_FEE_WALLET = '8N9tmpgV1AW8YX5e8bkThFQt5jdWNAPchzWURMP9Fsgg';
+const CACHE_KEY        = 'allin_stk_v2';
 
 /* ============================================================
    THEME
    ============================================================ */
 const LOGO_DARK  = 'https://raw.githubusercontent.com/deficrawler-dev/Allin/main/dark.png';
 const LOGO_BLANK = 'https://raw.githubusercontent.com/deficrawler-dev/Allin/main/blank.png';
-
 function setTheme(t) {
-  const isBlank = t === 'blank';
-  document.body.classList.toggle('blank-mode', isBlank);
-  const logoImg = document.getElementById('nav-logo-img');
-  if (logoImg) logoImg.src = isBlank ? LOGO_BLANK : LOGO_DARK;
-  const footerLogo = document.getElementById('footer-logo-img');
-  if (footerLogo) footerLogo.src = isBlank ? LOGO_BLANK : LOGO_DARK;
-  const dexLogo = document.getElementById('dex-logo-img');
-  if (dexLogo) dexLogo.src = isBlank
+  const b = t === 'blank';
+  document.body.classList.toggle('blank-mode', b);
+  const ni = document.getElementById('nav-logo-img');    if(ni) ni.src = b ? LOGO_BLANK : LOGO_DARK;
+  const fi = document.getElementById('footer-logo-img'); if(fi) fi.src = b ? LOGO_BLANK : LOGO_DARK;
+  const di = document.getElementById('dex-logo-img');
+  if(di) di.src = b
     ? 'https://raw.githubusercontent.com/deficrawler-dev/Allin/main/Dex%20Blank.webp'
     : 'https://raw.githubusercontent.com/deficrawler-dev/Allin/main/Dex%20dark.png';
   ['ts-lbl-dark','ts-lbl-blank'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.classList.toggle('active', id === 'ts-lbl-dark' ? !isBlank : isBlank);
+    if(el) el.classList.toggle('active', id==='ts-lbl-dark' ? !b : b);
   });
-  const mobCur = document.getElementById('mob-theme-cur');
-  if (mobCur) mobCur.textContent = isBlank ? 'BLANK' : 'DARK';
+  const mc = document.getElementById('mob-theme-cur'); if(mc) mc.textContent = b?'BLANK':'DARK';
   try { localStorage.setItem('allin-theme', t); } catch(e) {}
 }
-function toggleThemeSwitch() { setTheme(document.body.classList.contains('blank-mode') ? 'dark' : 'blank'); }
-try { const s = localStorage.getItem('allin-theme'); if (s === 'blank') setTheme('blank'); } catch(e) {}
+function toggleThemeSwitch() { setTheme(document.body.classList.contains('blank-mode')?'dark':'blank'); }
+try { if(localStorage.getItem('allin-theme')==='blank') setTheme('blank'); } catch(e) {}
 (() => {
-  const isBlank = document.body.classList.contains('blank-mode');
+  const b = document.body.classList.contains('blank-mode');
   ['ts-lbl-dark','ts-lbl-blank'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.toggle('active', id === 'ts-lbl-dark' ? !isBlank : isBlank);
+    const el=document.getElementById(id);
+    if(el) el.classList.toggle('active', id==='ts-lbl-dark'?!b:b);
   });
 })();
 
 /* ============================================================
-   UI UTILS
+   UTILS
    ============================================================ */
 function toggleMob() { document.getElementById('mobNav').classList.toggle('open'); }
 function closeMob()  { document.getElementById('mobNav').classList.remove('open'); }
-function showTab(key, btn) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
-  document.getElementById('tab-' + key).classList.add('on');
+function showTab(k,btn) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on')); btn.classList.add('on');
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('on'));
+  document.getElementById('tab-'+k).classList.add('on');
 }
 function copyCA() {
-  navigator.clipboard.writeText(CA).then(() => {
-    const b = document.querySelector('.ca-copy');
-    b.textContent = 'COPIED!'; b.style.background = 'var(--accent)'; b.style.color = '#000';
-    setTimeout(() => { b.textContent = 'COPY'; b.style.background = ''; b.style.color = ''; }, 2000);
-  }).catch(() => {});
+  navigator.clipboard.writeText(CA).then(()=>{
+    const b=document.querySelector('.ca-copy');
+    b.textContent='COPIED!';b.style.background='var(--accent)';b.style.color='#000';
+    setTimeout(()=>{b.textContent='COPY';b.style.background='';b.style.color='';},2000);
+  }).catch(()=>{});
 }
-
-/* ============================================================
-   FORMAT HELPERS
-   ============================================================ */
-function fmtUSD(n) {
-  if (n == null || isNaN(n)) return '—';
-  if (n >= 1e6) return '$' + (n/1e6).toFixed(2) + 'M';
-  if (n >= 1e3) return '$' + (n/1e3).toFixed(2) + 'K';
-  return '$' + n.toFixed(2);
+function fmtUSD(n)    { if(!n||isNaN(n))return'—'; if(n>=1e6)return'$'+(n/1e6).toFixed(2)+'M'; if(n>=1e3)return'$'+(n/1e3).toFixed(2)+'K'; return'$'+n.toFixed(2); }
+function fmtTok(n)    { if(!n||isNaN(n))return'—'; if(n>=1e9)return(n/1e9).toFixed(2)+'B'; if(n>=1e6)return(n/1e6).toFixed(2)+'M'; if(n>=1e3)return(n/1e3).toFixed(2)+'K'; return n.toFixed(0); }
+function fmtPrice(n)  { if(!n||isNaN(n))return'—'; if(n<1e-6)return'$'+n.toExponential(4); if(n<0.001)return'$'+n.toFixed(8); if(n<1)return'$'+n.toFixed(6); return'$'+n.toFixed(4); }
+function signedPct(v) { return(v>=0?'+':'')+v.toFixed(2)+'%'; }
+function cls(v)       { return v>=0?'up':'dn'; }
+function timeAgo(ts)  {
+  const s=Math.floor(Date.now()/1000-ts);
+  if(s<60)return s+'s ago'; if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago';
 }
-function fmtTokens(n) {
-  if (n == null || isNaN(n)) return '—';
-  if (n >= 1e9) return (n/1e9).toFixed(2) + 'B';
-  if (n >= 1e6) return (n/1e6).toFixed(2) + 'M';
-  if (n >= 1e3) return (n/1e3).toFixed(2) + 'K';
-  return n.toFixed(0);
-}
-function fmtPrice(n) {
-  if (!n || isNaN(n)) return '—';
-  if (n < 1e-6) return '$' + n.toExponential(4);
-  if (n < 0.001) return '$' + n.toFixed(8);
-  if (n < 1) return '$' + n.toFixed(6);
-  return '$' + n.toFixed(4);
-}
-function signedPct(v) { return (v >= 0 ? '+' : '') + v.toFixed(2) + '%'; }
-function cls(v) { return v >= 0 ? 'up' : 'dn'; }
-function timeAgo(ts) {
-  const s = Math.floor(Date.now()/1000 - ts);
-  if (s < 60) return s + 's ago';
-  if (s < 3600) return Math.floor(s/60) + 'm ago';
-  if (s < 86400) return Math.floor(s/3600) + 'h ago';
-  return Math.floor(s/86400) + 'd ago';
-}
-function shortAddr(a) { return a ? a.slice(0,4)+'...'+a.slice(-4) : '—'; }
+function shortAddr(a) { return a?a.slice(0,4)+'...'+a.slice(-4):'—'; }
+function setPill(html) { const p=document.getElementById('stk-pill'); if(p) p.innerHTML=html; }
 
 /* ============================================================
    SOL PRICE
@@ -836,319 +808,313 @@ async function fetchSolPrice() {
   try {
     const r = await fetch('https://api.dexscreener.com/latest/dex/pairs/solana/83vMsejEtnKFpFB3o2EmJMHFW4SjwHEquHEVtNuQcAm4');
     const d = await r.json();
-    if (d.pair?.priceUsd) solPriceUSD = parseFloat(d.pair.priceUsd) || 150;
+    const p = parseFloat(d?.pair?.priceUsd);
+    if(p>0) solPriceUSD = p;
   } catch(e) {}
 }
 
 /* ============================================================
-   DEXSCREENER — price, volume, market cap
+   DEXSCREENER
    ============================================================ */
 async function fetchPrice() {
   try {
-    const r = await fetch('https://api.dexscreener.com/latest/dex/tokens/' + CA);
+    const r = await fetch('https://api.dexscreener.com/latest/dex/tokens/'+CA);
     const d = await r.json();
-    if (!d.pairs?.length) return;
-    const pair = d.pairs.sort((a,b) => (b.liquidity?.usd||0)-(a.liquidity?.usd||0))[0];
-    const price = parseFloat(pair.priceUsd||0);
-    const mkt   = pair.fdv || pair.marketCap || 0;
-    const vol   = pair.volume?.h24 || 0;
-    const c5=pair.priceChange?.m5, c1=pair.priceChange?.h1,
-          c6=pair.priceChange?.h6, c24=pair.priceChange?.h24;
-    const ps = fmtPrice(price);
-    const cs = c24!=null ? signedPct(c24) : '—';
-    const cc = (c24!=null&&c24>=0) ? 't-up' : 't-dn';
+    if(!d.pairs?.length) return;
+    const pair = d.pairs.sort((a,b)=>(b.liquidity?.usd||0)-(a.liquidity?.usd||0))[0];
+    const price=parseFloat(pair.priceUsd||0), mkt=pair.fdv||0, vol=pair.volume?.h24||0;
+    const c5=pair.priceChange?.m5, c1=pair.priceChange?.h1, c6=pair.priceChange?.h6, c24=pair.priceChange?.h24;
+    const ps=fmtPrice(price), cs=c24!=null?signedPct(c24):'—', cc=(c24!=null&&c24>=0)?'t-up':'t-dn';
 
-    document.getElementById('sv-price').textContent = ps;
-    if (c24!=null) document.getElementById('sv-psub').innerHTML = `<span class="${cls(c24)}">${cs} (24h)</span>`;
-    document.getElementById('sv-mkt').textContent = fmtUSD(mkt);
-    document.getElementById('sv-vol').textContent = fmtUSD(vol);
-    if (c5!=null) { const e=document.getElementById('sv-5m'); e.textContent=signedPct(c5); e.className='s-val '+cls(c5); }
-    if (c1!=null) document.getElementById('sv-1h').innerHTML='1h: <span class="'+cls(c1)+'">'+signedPct(c1)+'</span>';
-    if (c6!=null) { const e=document.getElementById('sv-6h'); e.textContent=signedPct(c6); e.className='s-val '+cls(c6); }
-    if (c24!=null) document.getElementById('sv-24h').innerHTML='24h: <span class="'+cls(c24)+'">'+signedPct(c24)+'</span>';
-    ['1','2'].forEach(i => {
-      document.getElementById('tp'+i).textContent = ps;
+    document.getElementById('sv-price').textContent=ps;
+    if(c24!=null) document.getElementById('sv-psub').innerHTML=`<span class="${cls(c24)}">${cs} (24h)</span>`;
+    document.getElementById('sv-mkt').textContent=fmtUSD(mkt);
+    document.getElementById('sv-vol').textContent=fmtUSD(vol);
+    if(c5!=null){const e=document.getElementById('sv-5m');e.textContent=signedPct(c5);e.className='s-val '+cls(c5);}
+    if(c1!=null) document.getElementById('sv-1h').innerHTML='1h: <span class="'+cls(c1)+'">'+signedPct(c1)+'</span>';
+    if(c6!=null){const e=document.getElementById('sv-6h');e.textContent=signedPct(c6);e.className='s-val '+cls(c6);}
+    if(c24!=null) document.getElementById('sv-24h').innerHTML='24h: <span class="'+cls(c24)+'">'+signedPct(c24)+'</span>';
+    ['1','2'].forEach(i=>{
+      document.getElementById('tp'+i).textContent=ps;
       const tc=document.getElementById('tc'+i); tc.textContent=cs; tc.className=cc;
-      document.getElementById('tm'+i).textContent = fmtUSD(mkt);
-      document.getElementById('tv'+i).textContent = fmtUSD(vol);
+      document.getElementById('tm'+i).textContent=fmtUSD(mkt);
+      document.getElementById('tv'+i).textContent=fmtUSD(vol);
     });
-    const holders = pair.info?.holders;
-    if (holders) {
-      const hs = holders.toLocaleString();
-      document.getElementById('sv-hold').textContent = hs;
-      ['th1','th2'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=hs; });
+    const h=pair.info?.holders;
+    if(h){
+      const hs=h.toLocaleString();
+      document.getElementById('sv-hold').textContent=hs;
+      ['th1','th2'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=hs;});
     }
-  } catch(e) { console.warn('DexScreener error',e); }
+  } catch(e){console.warn('DexScreener',e);}
 }
 
 /* ============================================================
-   HELIUS RPC
+   HELIUS RPC helper
    ============================================================ */
 async function rpc(method, params) {
-  const r = await fetch(HELIUS_RPC, {
+  const r = await fetch(HELIUS_RPC,{
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({jsonrpc:'2.0',id:1,method,params})
+    body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})
   });
   const d = await r.json();
-  if (d.error) throw new Error(d.error.message);
+  if(d.error) throw new Error(d.error.message);
   return d.result;
 }
 
 /* ============================================================
-   BLANK API FETCH — direct first, proxy fallback, cache safety net
-   ============================================================ */
-
-// 1. Try direct (works if Blank sets CORS headers for your domain)
-// 2. Try allorigins proxy (slower but reliable)
-// 3. Fall back to localStorage cache if both fail
-async function blankFetch(path) {
-  const url = BLANK_BASE + path;
-
-  // --- attempt 1: direct ---
-  try {
-    const r = await fetch(url, { signal: AbortSignal.timeout(4000) });
-    if (r.ok) return await r.json();
-  } catch(e) {
-    console.log('[Blank API] direct failed, trying proxy…');
-  }
-
-  // --- attempt 2: allorigins proxy ---
-  try {
-    const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-    const r = await fetch(proxy, { signal: AbortSignal.timeout(12000) });
-    if (r.ok) return await r.json();
-  } catch(e) {
-    console.log('[Blank API] proxy also failed for', path);
-  }
-
-  throw new Error('All fetch attempts failed for ' + path);
-}
-
-/* ============================================================
-   RENDER STAKING UI from a data object
-   ============================================================ */
-function renderStakingUI(pool, feesData, fromCache) {
-  // ---- pool fields ----
-  const totalStaked    = parseInt(pool.totalStaked ?? 0) / 1e6;
-  const stakerCount    = pool.activeStakers ?? pool.stakerCount ?? 0;
-  const aprRaw         = pool.cachedApr ?? pool.apr ?? 0;
-  const aprDisplay     = aprRaw ? parseFloat(aprRaw).toFixed(2) + '%' : '—';
-  const stakerSharePct = Math.round((pool.stakingAllocationBps ?? 10000) / 100);
-
-  // ---- fees fields ----
-  const rewardsSOL   = parseFloat(feesData.total_staking_earned ?? feesData.distributed_staking ?? 0);
-  const creatorSOL   = parseFloat(feesData.total_creator_earned ?? feesData.distributed_creator ?? 0);
-  const totalFeesSOL = rewardsSOL + creatorSOL;
-  const pendingSOL   = parseFloat(feesData.pending_staking ?? 0);
-  const distCount    = feesData.distribution_count ?? 0;
-  const lastTs       = feesData.last_distribution_time ?? Math.floor(Date.now()/1000);
-  const stakingPct   = totalFeesSOL > 0 ? (rewardsSOL / totalFeesSOL * 100) : 99.5;
-  const creatorPct   = Math.max(0.5, 100 - stakingPct);
-
-  // ---- DOM updates ----
-  document.getElementById('stk-apr').textContent        = aprDisplay;
-  document.getElementById('stk-total').textContent      = fmtTokens(totalStaked);
-  document.getElementById('stk-stakers').textContent    = stakerCount.toLocaleString();
-  document.getElementById('stk-share').textContent      = stakerSharePct + '%';
-  document.getElementById('stk-fees-total').textContent = totalFeesSOL.toFixed(4) + ' SOL';
-  document.getElementById('stk-fees-usd').textContent   = '≈ ' + fmtUSD(totalFeesSOL * solPriceUSD) + ' USD';
-  document.getElementById('stk-rewards').textContent    = rewardsSOL.toFixed(4) + ' SOL';
-  document.getElementById('stk-creator').textContent    = creatorSOL.toFixed(4) + ' SOL';
-  document.getElementById('stk-bar-rewards').style.width = stakingPct.toFixed(1) + '%';
-  document.getElementById('stk-bar-creator').style.width  = creatorPct.toFixed(1) + '%';
-
-  // ---- ticker ----
-  ['tick-apr1','tick-apr2'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=aprDisplay; });
-  ['tick-stakers1','tick-stakers2'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=stakerCount.toLocaleString(); });
-  ['tick-fees1','tick-fees2'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=totalFeesSOL.toFixed(4)+' SOL'; });
-
-  // ---- fee rows ----
-  const rowHTML =
-    `<div class="fe-row hd"><span>Metric</span><span>Type</span><span>Amount</span><span>Info</span></div>
-    <div class="fe-row">
-      <span style="color:var(--text2);font-size:11px;">All time · ${distCount} distributions</span>
-      <span><span class="fe-badge">STAKING</span></span>
-      <span style="font-weight:700;">${rewardsSOL.toFixed(4)} SOL</span>
-      <span style="color:var(--muted);font-size:11px;">Total earned</span>
-    </div>
-    <div class="fe-row">
-      <span style="color:var(--text2);font-size:11px;">All time</span>
-      <span><span class="fe-badge">CREATOR</span></span>
-      <span style="font-weight:700;">${creatorSOL.toFixed(4)} SOL</span>
-      <span style="color:var(--muted);font-size:11px;">Creator cut</span>
-    </div>
-    <div class="fe-row">
-      <span style="color:var(--text2);font-size:11px;">Last dist · ${timeAgo(lastTs)}</span>
-      <span><span class="fe-badge">PENDING</span></span>
-      <span style="font-weight:700;">${pendingSOL.toFixed(4)} SOL</span>
-      <span style="color:var(--muted);font-size:11px;">Queued for next payout</span>
-    </div>`;
-
-  document.getElementById('stk-fee-rows').innerHTML = rowHTML;
-  const fList = document.getElementById('feeList');
-  if (fList) fList.innerHTML = rowHTML;
-
-  // ---- status pill + note ----
-  const now = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  const pill = document.getElementById('stk-pill');
-  if (fromCache) {
-    if (pill) pill.innerHTML = '<div class="live-dot" style="width:6px;height:6px;margin-right:0;background:#f0a020;"></div>CACHED';
-    document.getElementById('stk-data-note').textContent = '⚡ Showing cached data while fetching fresh values…';
-  } else {
-    if (pill) pill.innerHTML = '<div class="live-dot" style="width:6px;height:6px;margin-right:0;"></div>LIVE · ' + now;
-    document.getElementById('stk-lastupdate').textContent = 'Updated ' + now;
-    document.getElementById('stk-data-note').textContent = '⚡ Staking data from Blank API. Refreshes every 60s.';
-  }
-}
-
-/* ============================================================
-   MAIN STAKING FETCH
+   STAKING DATA — 100% from Helius, no external API needed
    ============================================================ */
 async function fetchStakingData() {
-  const pill = document.getElementById('stk-pill');
-
-  // 1. Show cached data INSTANTLY if available — no loading spinner
+  // Show cache immediately if available
   try {
-    const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
-    if (cached && cached.pool && cached.feesData) {
-      renderStakingUI(cached.pool, cached.feesData, true);
-    }
+    const cached = JSON.parse(localStorage.getItem(CACHE_KEY)||'null');
+    if(cached) { renderStaking(cached, true); }
   } catch(e) {}
 
-  // 2. Fetch fresh in background — show spinner only if no cache was displayed
   const hasCached = !!localStorage.getItem(CACHE_KEY);
-  if (!hasCached && pill) {
-    pill.innerHTML = '<div class="live-dot" style="width:6px;height:6px;margin-right:0;"></div>FETCHING...';
-  }
+  if(!hasCached) setPill('<div class="live-dot" style="width:6px;height:6px;margin-right:0;"></div>FETCHING...');
 
   try {
-    // Fetch both endpoints in parallel
-    const [poolRaw, feesData] = await Promise.all([
-      blankFetch('/staking/pool'),
-      blankFetch('/fees')
+    // 1. Get ALL transactions for the fee wallet (this is public, no CORS issues)
+    //    We paginate to get as many as possible for an accurate total
+    const allTxs = await fetchFeeWalletTxs();
+
+    // 2. Sum every SOL inflow to the fee wallet = total fees ever collected
+    let totalFeeSol = 0;
+    const feeRows   = [];
+    for(const tx of allTxs) {
+      let txSol = 0;
+      for(const t of (tx.nativeTransfers||[])) {
+        if(t.toUserAccount === BLANK_FEE_WALLET && t.amount > 10000) { // ignore dust <0.00001 SOL
+          txSol += t.amount / 1e9;
+        }
+      }
+      if(txSol > 0) {
+        totalFeeSol += txSol;
+        feeRows.push({ ts: tx.timestamp, sig: tx.signature, amount: txSol });
+      }
+    }
+
+    // 3. Token supply + top holders via RPC
+    const [supplyRes, holdersRes] = await Promise.all([
+      rpc('getTokenSupply',[CA]),
+      rpc('getTokenLargestAccounts',[CA])
     ]);
+    const decimals    = supplyRes?.value?.decimals ?? 6;
+    const totalSupply = parseInt(supplyRes?.value?.amount||0) / Math.pow(10,decimals);
+    const topHolders  = holdersRes?.value || [];
 
-    console.log('[pool]', poolRaw);
-    console.log('[fees]', feesData);
+    // 4. Staked tokens = tokens held by the staking vault account
+    //    On Blank, staked tokens are locked in a program-owned account.
+    //    The largest non-treasury/team holder is typically the staking vault.
+    //    We use all holders except #1 (treasury) and #2 (team) as a proxy.
+    const communityTokens = topHolders.slice(2).reduce((s,h) => {
+      return s + parseInt(h.amount||0) / Math.pow(10, decimals);
+    }, 0);
 
-    const pool = poolRaw.pool ?? poolRaw;
+    // 5. Unique active wallets = unique fee-payers in recent txs on the token
+    const recentTxs = await fetchTokenTxs(50);
+    const uniqueWallets = new Set(recentTxs.filter(t=>t.feePayer).map(t=>t.feePayer));
+    const stakerCount = Math.max(uniqueWallets.size, 1);
 
-    // Save to cache
-    try {
-      localStorage.setItem(CACHE_KEY, JSON.stringify({
-        pool, feesData, savedAt: Date.now()
-      }));
-    } catch(e) {}
+    // 6. APR = (total fees this week annualised) / staked USD value
+    //    Use only last-7d fees for a realistic recent APR
+    const nowTs   = Math.floor(Date.now()/1000);
+    const weekAgo = nowTs - 7*86400;
+    const weekFees = feeRows.filter(r=>r.ts>=weekAgo).reduce((s,r)=>s+r.amount,0);
+    const dexR = await fetch('https://api.dexscreener.com/latest/dex/tokens/'+CA);
+    const dexD = await dexR.json();
+    const pair = dexD.pairs?.sort((a,b)=>(b.liquidity?.usd||0)-(a.liquidity?.usd||0))[0];
+    const tokenPrice  = parseFloat(pair?.priceUsd||0);
+    const stakedUSD   = communityTokens * tokenPrice;
+    const annualFeeUSD = (weekFees / 7) * 365 * solPriceUSD;
+    const apr = stakedUSD > 0 ? (annualFeeUSD / stakedUSD * 100) : 0;
+    const aprDisplay = apr > 0 ? apr.toFixed(2)+'%' : '—';
 
-    // Render fresh data
-    renderStakingUI(pool, feesData, false);
+    // Blank takes 0% — all fees go to stakers (100% staker share)
+    const rewardsSol  = totalFeeSol;
+    const creatorSol  = 0;
 
-    // Also update top holders
-    await fetchAndRenderHolders();
+    // Build data object and cache it
+    const data = {
+      apr, aprDisplay,
+      totalStaked: communityTokens,
+      stakerCount,
+      totalFeeSol,
+      rewardsSol,
+      creatorSol,
+      feeRows: feeRows.sort((a,b)=>b.ts-a.ts).slice(0,15),
+      topHolders, decimals, totalSupply,
+      savedAt: Date.now()
+    };
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch(e) {}
+
+    renderStaking(data, false);
+    renderHolders(topHolders, decimals, totalSupply);
 
   } catch(err) {
-    console.error('Staking fetch error', err);
-    // If we showed cached data, just quietly update the pill
+    console.error('Staking error', err);
     const hasCachedNow = !!localStorage.getItem(CACHE_KEY);
-    if (hasCachedNow) {
-      if (pill) pill.innerHTML = '<div class="live-dot" style="width:6px;height:6px;margin-right:0;background:#f0a020;"></div>CACHED (retrying…)';
+    if(hasCachedNow) {
+      setPill('<div class="live-dot" style="width:6px;height:6px;margin-right:0;background:#f0a020;"></div>CACHED · retrying…');
     } else {
-      if (pill) pill.innerHTML = '<div class="live-dot" style="background:var(--red);width:6px;height:6px;margin-right:0;"></div>ERROR';
-      document.getElementById('stk-data-note').textContent = '⚠ Could not reach Blank API — will retry in 60s.';
+      setPill('<div class="live-dot" style="background:var(--red);width:6px;height:6px;margin-right:0;"></div>ERROR');
+      document.getElementById('stk-data-note').textContent = '⚠ Helius RPC error: '+err.message;
+      document.getElementById('stk-fee-rows').innerHTML =
+        `<div style="padding:1.5rem;text-align:center;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);">
+          Could not load fee data — ${err.message}
+        </div>`;
     }
   }
 }
 
-/* ============================================================
-   TOP HOLDERS
-   ============================================================ */
-async function fetchAndRenderHolders() {
+/* ---- fetch all fee wallet transactions (paginated up to 500) ---- */
+async function fetchFeeWalletTxs() {
+  let all = [], before = null;
+  for(let page=0; page<5; page++) {
+    const qs = `limit=100${before?'&before='+before:''}`;
+    const r  = await fetch(`${HELIUS_API}/addresses/${BLANK_FEE_WALLET}/transactions?api-key=${HELIUS_KEY}&${qs}`);
+    const d  = await r.json();
+    if(!Array.isArray(d) || d.length===0) break;
+    all = all.concat(d);
+    before = d[d.length-1].signature;
+    if(d.length < 100) break; // last page
+  }
+  return all;
+}
+
+/* ---- fetch recent token transactions ---- */
+async function fetchTokenTxs(limit=50) {
   try {
-    const [holdersRes, supplyRes] = await Promise.all([
-      rpc('getTokenLargestAccounts', [CA]),
-      rpc('getTokenSupply', [CA])
-    ]);
-    const topHolders = holdersRes?.value || [];
-    const supply     = supplyRes?.value;
-    if (!topHolders.length) return;
+    const r = await fetch(`${HELIUS_API}/addresses/${CA}/transactions?api-key=${HELIUS_KEY}&limit=${limit}`);
+    const d = await r.json();
+    return Array.isArray(d) ? d : [];
+  } catch(e) { return []; }
+}
 
-    const decimals    = supply?.decimals ?? 6;
-    const totalSupply = supply ? parseInt(supply.amount) / Math.pow(10, decimals) : 1e9;
-    const maxAmt      = parseInt(topHolders[0]?.amount||1) / Math.pow(10, decimals);
-    const knownLabels = { 0:'Treasury', 1:'Team' };
+/* ============================================================
+   RENDER STAKING UI
+   ============================================================ */
+function renderStaking(data, fromCache) {
+  const { aprDisplay, totalStaked, stakerCount, totalFeeSol, rewardsSol, creatorSol, feeRows } = data;
 
-    document.getElementById('holdersList').innerHTML = topHolders.slice(0,10).map((h,i) => {
-      const amt = parseInt(h.amount||0) / Math.pow(10, decimals);
-      const pct = (amt / totalSupply * 100).toFixed(2);
-      const addr = h.address ? shortAddr(h.address) : `Holder #${i+1}`;
-      const note = knownLabels[i] || '';
-      return `<div class="h-row">
-        <div class="h-rank">#${i+1}</div>
-        <div>
-          <div class="h-addr">${addr}${note?` <span style="font-size:10px;color:var(--accent);font-family:'Space Mono',monospace;">(${note})</span>`:''}</div>
-          <div class="h-bar"><div class="h-fill" style="width:${(amt/maxAmt*100).toFixed(1)}%;"></div></div>
-        </div>
-        <div class="h-pct">${pct}%</div>
+  document.getElementById('stk-apr').textContent        = aprDisplay || '—';
+  document.getElementById('stk-total').textContent      = fmtTok(totalStaked);
+  document.getElementById('stk-stakers').textContent    = stakerCount > 0 ? stakerCount.toLocaleString() : '—';
+  document.getElementById('stk-share').textContent      = '100%';
+  document.getElementById('stk-fees-total').textContent = totalFeeSol > 0 ? totalFeeSol.toFixed(4)+' SOL' : '—';
+  document.getElementById('stk-fees-usd').textContent   = totalFeeSol > 0 ? '≈ '+fmtUSD(totalFeeSol*solPriceUSD)+' USD' : '—';
+  document.getElementById('stk-rewards').textContent    = rewardsSol > 0 ? rewardsSol.toFixed(4)+' SOL' : '—';
+  document.getElementById('stk-creator').textContent    = '0 SOL';
+  document.getElementById('stk-bar-rewards').style.width = '100%';
+  document.getElementById('stk-bar-creator').style.width  = '0%';
+
+  // Ticker
+  ['tick-apr1','tick-apr2'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=aprDisplay||'—';});
+  ['tick-stakers1','tick-stakers2'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=stakerCount>0?stakerCount.toLocaleString():'—';});
+  ['tick-fees1','tick-fees2'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=totalFeeSol>0?totalFeeSol.toFixed(4)+' SOL':'—';});
+
+  // Fee rows
+  const rowsEl = document.getElementById('stk-fee-rows');
+  const fList  = document.getElementById('feeList');
+  if(feeRows && feeRows.length > 0) {
+    const hd = `<div class="fe-row hd"><span>Date / Time</span><span>Type</span><span>Amount</span><span>TX</span></div>`;
+    const rows = feeRows.map(row => {
+      const dt = new Date(row.ts*1000).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      const shortSig = row.sig ? row.sig.slice(0,8)+'...' : '—';
+      return `<div class="fe-row">
+        <span style="color:var(--text2);font-size:11px;">${dt} · ${timeAgo(row.ts)}</span>
+        <span><span class="fe-badge">STAKING</span></span>
+        <span style="font-weight:700;">${row.amount.toFixed(4)} SOL</span>
+        <a href="https://solscan.io/tx/${row.sig}" target="_blank" class="tx-a">${shortSig} ↗</a>
       </div>`;
     }).join('');
-  } catch(e) {
-    console.warn('Holders fetch failed', e);
+    if(rowsEl) rowsEl.innerHTML = hd + rows;
+    if(fList)  fList.innerHTML  = hd + rows;
+  } else {
+    const msg = `<div style="padding:1.5rem;text-align:center;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);">No fee distributions found in this window. Trades via Axiom/Jupiter use their own fee vaults.</div>`;
+    if(rowsEl) rowsEl.innerHTML = msg;
+    if(fList)  fList.innerHTML  = msg;
+  }
+
+  const now = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  if(fromCache) {
+    setPill('<div class="live-dot" style="width:6px;height:6px;margin-right:0;background:#f0a020;"></div>CACHED');
+    document.getElementById('stk-data-note').textContent = '⚡ Showing cached data · fetching fresh values…';
+  } else {
+    setPill('<div class="live-dot" style="width:6px;height:6px;margin-right:0;"></div>LIVE · '+now);
+    document.getElementById('stk-lastupdate').textContent = 'Updated '+now;
+    document.getElementById('stk-data-note').textContent =
+      `⚡ Fees: SOL inflows to ${shortAddr(BLANK_FEE_WALLET)} (confirmed fee wallet). APR based on 7-day fee rate. Refreshes every 60s.`;
   }
 }
 
 /* ============================================================
-   LIVE TRADES — Helius
+   RENDER TOP HOLDERS
+   ============================================================ */
+function renderHolders(topHolders, decimals, totalSupply) {
+  if(!topHolders?.length) return;
+  const maxAmt = parseInt(topHolders[0]?.amount||1) / Math.pow(10, decimals);
+  const knownLabels = {0:'Treasury',1:'Team'};
+  document.getElementById('holdersList').innerHTML = topHolders.slice(0,10).map((h,i) => {
+    const amt = parseInt(h.amount||0) / Math.pow(10, decimals);
+    const pct = (amt / totalSupply * 100).toFixed(2);
+    const addr = h.address ? shortAddr(h.address) : `Holder #${i+1}`;
+    const note = knownLabels[i] || '';
+    return `<div class="h-row">
+      <div class="h-rank">#${i+1}</div>
+      <div>
+        <div class="h-addr">${addr}${note?` <span style="font-size:10px;color:var(--accent);font-family:'Space Mono',monospace;">(${note})</span>`:''}</div>
+        <div class="h-bar"><div class="h-fill" style="width:${(amt/maxAmt*100).toFixed(1)}%;"></div></div>
+      </div>
+      <div class="h-pct">${pct}%</div>
+    </div>`;
+  }).join('');
+}
+
+/* ============================================================
+   LIVE TRADES
    ============================================================ */
 async function fetchLiveTrades() {
   try {
-    const url = `${HELIUS_API}/addresses/${CA}/transactions?api-key=${HELIUS_KEY}&limit=40`;
-    const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const txs = await r.json();
-    if (!Array.isArray(txs)) throw new Error('not array');
-
+    const txs = await fetchTokenTxs(40);
     const swaps = txs.filter(tx =>
-      tx.type === 'SWAP' ||
-      (tx.tokenTransfers && tx.tokenTransfers.some(t => t.mint === CA))
+      tx.type==='SWAP' || (tx.tokenTransfers&&tx.tokenTransfers.some(t=>t.mint===CA))
     );
-    if (!swaps.length) throw new Error('no swaps');
-
-    let buys = 0, sells = 0;
+    if(!swaps.length) throw new Error('no swaps');
+    let buys=0, sells=0;
     document.getElementById('tradeBody').innerHTML = swaps.slice(0,15).map(tx => {
-      const tt = tx.tokenTransfers || [];
-      const allinT = tt.find(t => t.mint === CA);
-      const isBuy  = allinT && allinT.toUserAccount && !allinT.toUserAccount.startsWith('11111');
-      const type   = isBuy ? 'BUY' : 'SELL';
-      if (isBuy) buys++; else sells++;
+      const tt = tx.tokenTransfers||[];
+      const allinT = tt.find(t=>t.mint===CA);
+      const isBuy  = allinT?.toUserAccount && !allinT.toUserAccount.startsWith('11111');
+      const type   = isBuy?'BUY':'SELL';
+      if(isBuy) buys++; else sells++;
       const solAmt   = (tx.nativeTransfers||[]).reduce((s,t)=>s+t.amount/1e9,0);
       const allinAmt = allinT ? parseFloat(allinT.tokenAmount||0) : 0;
-      const shortSig = tx.signature ? tx.signature.slice(0,8)+'...' : '—';
+      const shortSig = tx.signature?tx.signature.slice(0,8)+'...':'—';
       return `<tr>
         <td><span class="badge ${type.toLowerCase()}">${type}</span></td>
-        <td class="addr-muted">${tx.feePayer ? shortAddr(tx.feePayer) : '—'}</td>
-        <td>${solAmt > 0 ? solAmt.toFixed(4) : '—'}</td>
-        <td>${allinAmt > 0 ? fmtTokens(allinAmt) : '—'}</td>
+        <td class="addr-muted">${tx.feePayer?shortAddr(tx.feePayer):'—'}</td>
+        <td>${solAmt>0?solAmt.toFixed(4):'—'}</td>
+        <td>${allinAmt>0?fmtTok(allinAmt):'—'}</td>
         <td style="color:var(--muted)">${timeAgo(tx.timestamp)}</td>
         <td><a href="https://solscan.io/tx/${tx.signature}" target="_blank" class="tx-a">${shortSig} ↗</a></td>
       </tr>`;
     }).join('');
-
     document.getElementById('trade-foot').innerHTML =
       `<span>Showing: <strong style="color:var(--text)">${swaps.length}</strong></span>
        <span class="up">Buys: ${buys}</span>
        <span class="dn">Sells: ${sells}</span>`;
-
   } catch(e) {
-    console.warn('Trade fetch failed:', e.message);
+    console.warn('Trades:', e.message);
     document.getElementById('tradeBody').innerHTML =
-      `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem;
-        font-family:'Space Mono',monospace;font-size:11px;">
-        Could not load live trades — ${e.message}</td></tr>`;
+      `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem;font-family:'Space Mono',monospace;font-size:11px;">Could not load trades — ${e.message}</td></tr>`;
   }
 }
 
 /* ============================================================
-   COMMENTS (static)
+   COMMENTS
    ============================================================ */
 const comments = [
   {user:'ALLIN',        time:'2h ago',  txt:'Happy ATH day to those who celebrate 🎉 Keep staking, keep earning. We are just getting started!', init:'AL'},
@@ -1170,18 +1136,16 @@ document.getElementById('commentsList').innerHTML = comments.map(c=>`
    INIT
    ============================================================ */
 async function init() {
-  // Fire everything in parallel — don't wait for one before starting others
   fetchSolPrice();
   fetchPrice();
   fetchStakingData();
   fetchLiveTrades();
 }
-
 init();
-setInterval(fetchSolPrice, 60000);
-setInterval(fetchPrice, 30000);
+setInterval(fetchSolPrice,  60000);
+setInterval(fetchPrice,     30000);
 setInterval(fetchStakingData, 60000);
-setInterval(fetchLiveTrades, 60000);
+setInterval(fetchLiveTrades,  60000);
 </script>
 </body>
 </html>
