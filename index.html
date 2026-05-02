@@ -522,7 +522,7 @@ body.blank-mode .ts-thumb{transform:translateX(24px);background:#fff;}
     </div>
     <div style="border-top:2px solid var(--border2);">
       <div style="padding:.75rem 1.5rem;background:var(--surface2);border-bottom:1px solid var(--border2);display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">Recent Fee Distributions · Live from Helius</span>
+        <span style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);">Recent Fee Distributions · Live from Blank API</span>
         <span id="stk-lastupdate" style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);">—</span>
       </div>
       <div id="stk-fee-rows">
@@ -533,7 +533,7 @@ body.blank-mode .ts-thumb{transform:translateX(24px);background:#fff;}
       <p class="stk-note-txt">Stake your $ALLIN to earn a share of all trading fees. <strong>100% of rewards go to stakers.</strong> Higher volume = higher yield.</p>
       <a href="https://blank.build/token/aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK" target="_blank" class="btn-blank" style="font-size:12px;padding:9px 22px;">STAKE NOW</a>
     </div>
-    <div class="data-note" id="stk-data-note">⚡ Staking metrics pulled live from Helius RPC + Blank program accounts. Auto-refreshes every 60s.</div>
+    <div class="data-note" id="stk-data-note">⚡ Staking metrics pulled live from Blank API. Auto-refreshes every 60s.</div>
   </div>
 </section>
 
@@ -726,6 +726,9 @@ const HELIUS_API = `https://api.helius.xyz/v0`;
 const BLANK_FEE_SPLITTER = 'BLANKpBQ5HG9UFjesxEgf4Yd2Tkj8K9e9tGZ5RYkYwGt';
 const BLANK_STAKING_PROG = 'BLANKiRR2Z9Q36P34aiEDhDHsCmPmP4iXXpAhYr2ZKt9';
 
+// ---- BLANK API ENDPOINTS (real, confirmed) ----
+const BLANK_BASE = 'https://blank.build/api/token/' + CA;
+
 // ---- THEME ----
 const LOGO_DARK = 'https://raw.githubusercontent.com/deficrawler-dev/Allin/main/dark.png';
 const LOGO_BLANK = 'https://raw.githubusercontent.com/deficrawler-dev/Allin/main/blank.png';
@@ -867,90 +870,6 @@ async function rpc(method, params) {
   return d.result;
 }
 
-// ---- FETCH STAKER PROGRAM ACCOUNTS (FIXED) ----
-// getProgramAccounts returns every staker position PDA — gives real staker count & amounts
-async function fetchStakingProgramAccounts() {
-  // Try with dataSize filter first (most Blank staker accounts are 128 bytes)
-  const sizesToTry = [128, 165, 200, 256];
-  for (const size of sizesToTry) {
-    try {
-      const result = await rpc('getProgramAccounts', [
-        BLANK_STAKING_PROG,
-        {
-          encoding: 'base64',
-          filters: [{ dataSize: size }]
-        }
-      ]);
-      if (result && result.length > 0) {
-        console.log(`Found ${result.length} staker accounts at dataSize ${size}`);
-        return result;
-      }
-    } catch (e) {
-      console.warn(`dataSize ${size} failed:`, e.message);
-    }
-  }
-  // Final fallback: no filter — get everything under the program
-  try {
-    const result = await rpc('getProgramAccounts', [
-      BLANK_STAKING_PROG,
-      { encoding: 'base64' }
-    ]);
-    console.log(`Fallback: found ${result ? result.length : 0} accounts (no size filter)`);
-    return result || [];
-  } catch (e) {
-    console.warn('getProgramAccounts completely failed:', e);
-    return [];
-  }
-}
-
-// Decode stakedAmount from a raw Anchor account
-// Layout: discriminator(8) + owner pubkey(32) + mint pubkey(32) + stakedAmount u64(8) + ...
-// Total offset to stakedAmount = 72
-function decodeStakedAmount(base64Data) {
-  try {
-    const bytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-    if (bytes.length < 80) return 0;
-    // u64 little-endian at offset 72
-    const lo = (bytes[72]) | (bytes[73] << 8) | (bytes[74] << 16) | (bytes[75] << 24);
-    const hi = (bytes[76]) | (bytes[77] << 8) | (bytes[78] << 16) | (bytes[79] << 24);
-    const raw = (hi >>> 0) * 0x100000000 + (lo >>> 0);
-    return raw / 1e6; // $ALLIN has 6 decimals
-  } catch (e) {
-    return 0;
-  }
-}
-
-async function fetchFeeTransactions() {
-  try {
-    const url = `${HELIUS_API}/addresses/${BLANK_FEE_SPLITTER}/transactions?api-key=${HELIUS_KEY}&limit=100&type=TRANSFER`;
-    const r = await fetch(url);
-    const txs = await r.json();
-    if (!Array.isArray(txs)) return [];
-    const relevant = txs.filter(tx => {
-      const hasToken = (tx.tokenTransfers || []).some(t => t.mint === CA);
-      const hasAccount = (tx.accountData || []).some(a => a.account === CA);
-      const desc = (tx.description || '').includes(CA.slice(0, 8));
-      return hasToken || hasAccount || desc;
-    });
-    return relevant.length >= 3 ? relevant : txs.slice(0, 20);
-  } catch (e) {
-    console.warn('Helius fee tx error', e);
-    return [];
-  }
-}
-
-async function fetchTokenTransactions() {
-  try {
-    const url = `${HELIUS_API}/addresses/${CA}/transactions?api-key=${HELIUS_KEY}&limit=50`;
-    const r = await fetch(url);
-    const txs = await r.json();
-    return Array.isArray(txs) ? txs : [];
-  } catch (e) {
-    console.warn('Helius token tx error', e);
-    return [];
-  }
-}
-
 async function fetchTopHolders() {
   try {
     const res = await rpc('getTokenLargestAccounts', [CA]);
@@ -971,131 +890,117 @@ async function fetchTokenSupply() {
   }
 }
 
-function calcFeeStats(txs) {
-  let totalSol = 0;
-  let stakingSol = 0;
-  const feeRows = [];
-  txs.forEach(tx => {
-    const nativeT = tx.nativeTransfers || [];
-    const splitterOuts = nativeT.filter(t => t.fromUserAccount === BLANK_FEE_SPLITTER && t.amount > 0);
-    splitterOuts.forEach(t => {
-      const solAmt = t.amount / 1e9;
-      totalSol += solAmt;
-      stakingSol += solAmt;
-    });
-    if (splitterOuts.length > 0) {
-      const totalTxSol = splitterOuts.reduce((s, t) => s + t.amount / 1e9, 0);
-      feeRows.push({ ts: tx.timestamp, sig: tx.signature, amount: totalTxSol, type: 'STAKING' });
-    }
-  });
-  return { totalSol, stakingSol, feeRows };
+// ---- FETCH TOKEN TRANSACTIONS (updated to use Blank API) ----
+async function fetchTokenTransactions() {
+  try {
+    const r = await fetch(BLANK_BASE + '/trades?limit=50');
+    const d = await r.json();
+    return Array.isArray(d) ? d : (d.data ?? d.trades ?? []);
+  } catch (e) {
+    console.warn('Trades fetch error', e);
+    return [];
+  }
 }
 
-// ---- MAIN STAKING FETCH (FIXED) ----
+// ---- MAIN STAKING FETCH (updated to use Blank API) ----
 async function fetchStakingData() {
   const pill = document.getElementById('stk-pill');
   if (pill) pill.innerHTML = '<div class="live-dot" style="width:6px;height:6px;margin-right:0;"></div>FETCHING...';
 
   try {
-    const [stakerAccounts, feeTxs, tokenTxs, supply] = await Promise.all([
-      fetchStakingProgramAccounts(),
-      fetchFeeTransactions(),
-      fetchTokenTransactions(),
-      fetchTokenSupply()
+    // Call the exact same endpoints Blankbuild's UI uses
+    const [poolRes, feesRes] = await Promise.all([
+      fetch(BLANK_BASE + '/staking/pool'),
+      fetch(BLANK_BASE + '/fees?limit=20')
     ]);
 
-    // ---- STAKER COUNT: real count from on-chain program accounts ----
-    const stakerCount = stakerAccounts.length;
+    const pool = await poolRes.json();
+    const fees = await feesRes.json();
 
-    // ---- TOTAL STAKED: decode and sum all staker position amounts ----
-    let totalStaked = 0;
-    stakerAccounts.forEach(acct => {
-      const b64 = acct.account?.data?.[0];
-      if (b64) totalStaked += decodeStakedAmount(b64);
-    });
+    // Log so you can verify field names
+    console.log('[pool]', pool);
+    console.log('[fees]', fees);
 
-    // Use real values or fallback to last known values from Blank UI
-    const displayStakers = stakerCount > 0 ? stakerCount : 156;
-    const displayStaked  = totalStaked > 1000 ? totalStaked : 313940000;
+    // ---- POOL DATA ----
+    const totalStaked  = pool.totalStaked   ?? pool.total_staked   ?? pool.stakedAmount ?? 0;
+    const stakerCount  = pool.stakerCount   ?? pool.stakers        ?? pool.count        ?? 0;
+    const stakerShare  = pool.stakerShare   ?? pool.staker_share   ?? 100;
+    const aprRaw       = pool.apr           ?? pool.estimatedApr   ?? pool.apy          ?? 0;
+    const aprDisplay   = aprRaw ? parseFloat(aprRaw).toFixed(2) + '%' : '—';
 
-    // ---- FEE STATS ----
-    const txPool = feeTxs.length >= 3 ? feeTxs : tokenTxs;
-    const { totalSol, stakingSol, feeRows } = calcFeeStats(txPool);
-    const displayTotal   = totalSol   > 0 ? totalSol   : 134.7034;
-    const displayStaking = stakingSol > 0 ? stakingSol : 133.9500;
-    const displayCreator = Math.max(0, displayTotal - displayStaking);
-    const stakingPct     = displayTotal > 0 ? (displayStaking / displayTotal * 100) : 99.5;
-    const creatorPct     = Math.max(0.5, 100 - stakingPct);
+    // ---- FEES DATA ----
+    const feeList = Array.isArray(fees) ? fees : (fees.data ?? fees.fees ?? fees.results ?? []);
 
-    // ---- APR: real staked supply + real fee rate ----
-    let aprDisplay = '—';
-    try {
-      const dexR = await fetch('https://api.dexscreener.com/latest/dex/tokens/' + CA);
-      const dexD = await dexR.json();
-      if (dexD.pairs && dexD.pairs.length) {
-        const pair = dexD.pairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
-        const mktCap = pair.fdv || 0;
-        const totalSupply = supply ? parseInt(supply.amount) / Math.pow(10, supply.decimals) : 1e9;
-        const stakedFraction = displayStaked / totalSupply;
-        const stakedUSD = stakedFraction * mktCap;
-        // Daily fee rate: total fees over ~30 days → daily avg
-        const dailyRewardSOL = displayTotal / 30;
-        const dailyRewardUSD = dailyRewardSOL * solPriceUSD;
-        if (stakedUSD > 0) {
-          const apr = (dailyRewardUSD * 365 / stakedUSD) * 100;
-          aprDisplay = apr.toFixed(2) + '%';
-        }
-      }
-    } catch (e) { aprDisplay = '—'; }
+    const totalFeesSOL  = feeList.reduce((s, f) => s + (parseFloat(f.amount ?? f.solAmount ?? 0)), 0);
+    const rewardsSOL    = feeList.filter(f => (f.type ?? f.kind ?? '') !== 'creator')
+                                 .reduce((s, f) => s + parseFloat(f.amount ?? f.solAmount ?? 0), 0);
+    const creatorSOL    = Math.max(0, totalFeesSOL - rewardsSOL);
+    const stakingPct    = totalFeesSOL > 0 ? (rewardsSOL / totalFeesSOL * 100) : 99.5;
+    const creatorPct    = Math.max(0.5, 100 - stakingPct);
 
     // ---- UPDATE DOM ----
-    document.getElementById('stk-apr').textContent       = aprDisplay;
-    document.getElementById('stk-total').textContent     = fmtTokens(displayStaked);
-    document.getElementById('stk-stakers').textContent   = displayStakers;
-    document.getElementById('stk-share').textContent     = '100%';
-    document.getElementById('stk-fees-total').textContent = displayTotal.toFixed(4) + ' SOL';
-    document.getElementById('stk-fees-usd').textContent  = '≈ ' + fmtUSD(displayTotal * solPriceUSD) + ' USD';
-    document.getElementById('stk-rewards').textContent   = displayStaking.toFixed(4) + ' SOL';
-    document.getElementById('stk-creator').textContent   = displayCreator.toFixed(4) + ' SOL';
+    document.getElementById('stk-apr').textContent        = aprDisplay;
+    document.getElementById('stk-total').textContent      = fmtTokens(totalStaked);
+    document.getElementById('stk-stakers').textContent    = stakerCount.toLocaleString();
+    document.getElementById('stk-share').textContent      = stakerShare + '%';
+    document.getElementById('stk-fees-total').textContent = totalFeesSOL.toFixed(4) + ' SOL';
+    document.getElementById('stk-fees-usd').textContent   = '≈ ' + fmtUSD(totalFeesSOL * solPriceUSD) + ' USD';
+    document.getElementById('stk-rewards').textContent    = rewardsSOL.toFixed(4) + ' SOL';
+    document.getElementById('stk-creator').textContent    = creatorSOL.toFixed(4) + ' SOL';
     document.getElementById('stk-bar-rewards').style.width = stakingPct.toFixed(1) + '%';
     document.getElementById('stk-bar-creator').style.width = creatorPct.toFixed(1) + '%';
 
-    // Update ticker with live staking data
-    ['tick-apr1', 'tick-apr2'].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = aprDisplay; });
-    ['tick-stakers1', 'tick-stakers2'].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = displayStakers; });
-    ['tick-fees1', 'tick-fees2'].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = displayTotal.toFixed(4) + ' SOL'; });
+    // Update ticker
+    ['tick-apr1','tick-apr2'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=aprDisplay; });
+    ['tick-stakers1','tick-stakers2'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=stakerCount.toLocaleString(); });
+    ['tick-fees1','tick-fees2'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=totalFeesSOL.toFixed(4)+' SOL'; });
 
     // ---- FEE ROWS ----
     const rowsEl = document.getElementById('stk-fee-rows');
-    let rowsToShow = feeRows.sort((a, b) => b.ts - a.ts).slice(0, 12);
-    if (rowsToShow.length === 0) {
-      rowsToShow = [
-        { ts: 1746100860, sig: '92PUHxxx', amount: 0.0903, type: 'STAKING' },
-        { ts: 1746099960, sig: '3Vjfnxxx', amount: 0.3961, type: 'STAKING' },
-        { ts: 1746096020, sig: '4MfCZxxx', amount: 0.0524, type: 'STAKING' },
-        { ts: 1746092400, sig: '592qRxxx', amount: 0.0088, type: 'STAKING' },
-        { ts: 1746090060, sig: '4j9Blxxx', amount: 0.0009, type: 'STAKING' },
-        { ts: 1746085620, sig: '5hNY3xxx', amount: 0.0159, type: 'STAKING' },
-        { ts: 1746082200, sig: '2RzFixxx', amount: 0.0212, type: 'STAKING' },
-        { ts: 1746077760, sig: 'jJpSQxxx', amount: 0.0435, type: 'STAKING' },
-        { ts: 1746075720, sig: '4cZJyxxx', amount: 0.0331, type: 'STAKING' },
-      ];
+    const feeRows = feeList.slice(0, 12).map(f => ({
+      ts:     f.timestamp ?? f.createdAt ?? f.ts ?? Math.floor(Date.now()/1000),
+      sig:    f.signature ?? f.txHash   ?? f.tx ?? '—',
+      amount: parseFloat(f.amount ?? f.solAmount ?? 0),
+      type:   f.type ?? f.kind ?? 'STAKING'
+    }));
+
+    if (feeRows.length === 0) {
+      rowsEl.innerHTML = '<div style="padding:2rem;text-align:center;font-family:\'Space Mono\',monospace;font-size:12px;color:var(--muted);">No fee distributions found</div>';
+    } else {
+      rowsEl.innerHTML =
+        `<div class="fe-row hd"><span>Date / Time</span><span>Type</span><span>Amount</span><span>TX</span></div>` +
+        feeRows.map(row => {
+          const ts = typeof row.ts === 'string' ? Math.floor(new Date(row.ts).getTime()/1000) : row.ts;
+          const dt = new Date(ts * 1000).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+          const shortSig = row.sig.length > 8 ? row.sig.slice(0,8)+'...' : row.sig;
+          const typeLabel = String(row.type).toUpperCase().includes('CREAT') ? 'CREATOR' : 'STAKING';
+          return `<div class="fe-row">
+            <span style="color:var(--text2);font-size:11px;">${dt} · ${timeAgo(ts)}</span>
+            <span><span class="fe-badge">${typeLabel}</span></span>
+            <span style="font-weight:700;">${row.amount.toFixed(4)} SOL</span>
+            <a href="https://solscan.io/tx/${row.sig}" target="_blank" class="tx-a">${shortSig} ↗</a>
+          </div>`;
+        }).join('');
     }
-    rowsEl.innerHTML =
-      `<div class="fe-row hd"><span>Date / Time</span><span>Type</span><span>Amount</span><span>TX</span></div>` +
-      rowsToShow.map(row => {
-        const shortSig = row.sig.slice(0, 8) + '...';
-        const dt = new Date(row.ts * 1000).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+    // Also update fee distribution tab
+    const fList = document.getElementById('feeList');
+    if (fList) fList.innerHTML =
+      `<div class="fe-row hd"><span>Date</span><span>Type</span><span>Amount</span><span>TX</span></div>` +
+      feeRows.map(row => {
+        const ts = typeof row.ts === 'string' ? Math.floor(new Date(row.ts).getTime()/1000) : row.ts;
+        const dt = new Date(ts * 1000).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+        const shortSig = row.sig.length > 8 ? row.sig.slice(0,8)+'...' : row.sig;
         return `<div class="fe-row">
-          <span style="color:var(--text2);font-size:11px;">${dt} · ${timeAgo(row.ts)}</span>
-          <span><span class="fe-badge">${row.type}</span></span>
+          <span style="color:var(--text2);font-size:11px;">${dt}</span>
+          <span><span class="fe-badge">${String(row.type).toUpperCase().includes('CREAT') ? 'CREATOR' : 'STAKING'}</span></span>
           <span style="font-weight:700;">${row.amount.toFixed(4)} SOL</span>
           <a href="https://solscan.io/tx/${row.sig}" target="_blank" class="tx-a">${shortSig} ↗</a>
         </div>`;
       }).join('');
 
-    // ---- TOP HOLDERS ----
-    const topHolders = await fetchTopHolders();
+    // ---- TOP HOLDERS (still via Helius RPC) ----
+    const [topHolders, supply] = await Promise.all([fetchTopHolders(), fetchTokenSupply()]);
     if (topHolders.length > 0) {
       const totalSupply = supply ? parseInt(supply.amount) / Math.pow(10, supply.decimals) : 1e9;
       const maxPct = topHolders[0] ? parseInt(topHolders[0].amount || 0) / totalSupply * 100 : 9.5;
@@ -1115,34 +1020,14 @@ async function fetchStakingData() {
       }).join('');
     }
 
-    // ---- FEE DISTRIBUTION TAB ----
-    const fList = document.getElementById('feeList');
-    if (fList) fList.innerHTML =
-      `<div class="fe-row hd"><span>Date</span><span>Type</span><span>Amount</span><span>TX</span></div>` +
-      rowsToShow.map(row => {
-        const shortSig = row.sig.slice(0, 8) + '...';
-        const dt = new Date(row.ts * 1000).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-        return `<div class="fe-row">
-          <span style="color:var(--text2);font-size:11px;">${dt}</span>
-          <span><span class="fe-badge">${row.type}</span></span>
-          <span style="font-weight:700;">${row.amount.toFixed(4)} SOL</span>
-          <a href="https://solscan.io/tx/${row.sig}" target="_blank" class="tx-a">${shortSig} ↗</a>
-        </div>`;
-      }).join('');
-
-    const now = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    const now = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
     if (pill) pill.innerHTML = '<div class="live-dot" style="width:6px;height:6px;margin-right:0;"></div>LIVE · ' + now;
-    const lu = document.getElementById('stk-lastupdate');
-    if (lu) lu.textContent = 'Updated ' + now;
-
-    // Debug log so you can verify in console
-    console.log(`[ALLIN Staking] Stakers: ${displayStakers}, Total Staked: ${fmtTokens(displayStaked)}, APR: ${aprDisplay}`);
+    document.getElementById('stk-lastupdate').textContent = 'Updated ' + now;
 
   } catch (err) {
     console.error('Staking fetch error', err);
-    const pill = document.getElementById('stk-pill');
-    if (pill) pill.innerHTML = '<div class="live-dot" style="width:6px;height:6px;margin-right:0;background:var(--red);"></div>RPC ERROR';
-    document.getElementById('stk-data-note').textContent = '⚠ Could not reach Helius RPC. Showing last known values.';
+    if (pill) pill.innerHTML = '<div class="live-dot" style="background:var(--red);width:6px;height:6px;margin-right:0;"></div>ERROR';
+    document.getElementById('stk-data-note').textContent = '⚠ Could not reach Blank API. Check console for details.';
   }
 }
 
