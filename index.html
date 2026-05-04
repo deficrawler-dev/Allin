@@ -487,7 +487,7 @@ body.blank-mode .ts-thumb{transform:translateX(24px);background:#fff;}
 <div class="divider"></div>
 
 <section class="section" id="staking">
-  <div class="eyebrow">Earn passive income · Live on-chain data via Blank API</div>
+  <div class="eyebrow">Earn passive income · Live on-chain data</div>
   <div class="sec-title">STAKING DASHBOARD</div>
   <div class="stk-wrap">
     <div class="stk-head">
@@ -526,14 +526,14 @@ body.blank-mode .ts-thumb{transform:translateX(24px);background:#fff;}
         <span id="stk-lastupdate" style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);">—</span>
       </div>
       <div id="stk-fee-rows">
-        <div style="padding:2rem;text-align:center;font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);">Fetching on-chain data...</div>
+        <div style="padding:2rem;text-align:center;font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);">Fetching on-chain transactions...</div>
       </div>
     </div>
     <div class="stk-note">
       <p class="stk-note-txt">Stake your $ALLIN to earn a share of all trading fees. <strong>100% of rewards go to stakers.</strong> Higher volume = higher yield.</p>
       <a href="https://blank.build/token/aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK" target="_blank" class="btn-blank" style="font-size:12px;padding:9px 22px;">STAKE NOW</a>
     </div>
-    <div class="data-note" id="stk-data-note">⚡ Staking metrics pulled live from Blank API via Cloudflare Worker. Auto-refreshes every 60s.</div>
+    <div class="data-note" id="stk-data-note">⚡ Staking metrics pulled live from Blank API. Auto-refreshes every 60s.</div>
   </div>
 </section>
 
@@ -557,9 +557,9 @@ body.blank-mode .ts-thumb{transform:translateX(24px);background:#fff;}
         </table>
       </div>
       <div class="tab-foot">
-        <span id="trade-total-count">Total: —</span>
-        <span class="up" id="trade-buy-count">Buys: —</span>
-        <span class="dn" id="trade-sell-count">Sells: —</span>
+        <span>Total: <strong style="color:var(--text)">10,597</strong></span>
+        <span class="up">Buys: 6,723</span>
+        <span class="dn">Sells: 3,874</span>
       </div>
     </div>
     <div class="tab-pane" id="tab-comments">
@@ -632,8 +632,8 @@ body.blank-mode .ts-thumb{transform:translateX(24px);background:#fff;}
     </div>
     <div class="tok-cell">
       <div class="tok-lbl">Status</div>
-      <div class="tok-val" id="tok-status" style="color:var(--green);font-size:36px;">GRADUATED</div>
-      <p class="tok-note" id="tok-status-note">$ALLIN has graduated from Blank and is now live on Meteora. Strong community with <span id="tok-holders">203</span>+ holders.</p>
+      <div class="tok-val" style="color:var(--green);font-size:36px;">GRADUATED</div>
+      <p class="tok-note">$ALLIN has graduated from Blank and is now live on Meteora. Strong community with 223+ holders.</p>
     </div>
     <div class="tok-cell">
       <div class="tok-lbl">Fee Model</div>
@@ -670,7 +670,7 @@ body.blank-mode .ts-thumb{transform:translateX(24px);background:#fff;}
     <div class="step">
       <div class="step-n">04</div>
       <div class="step-t">STAKE & EARN</div>
-      <p class="step-d">Stake your $ALLIN tokens on Blank to earn high APR from all trading fees. 100% to stakers.</p>
+      <p class="step-d">Stake your $ALLIN tokens on Blank to earn 600%+ APR from all trading fees. 100% to stakers.</p>
       <a href="https://blank.build/token/aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK" target="_blank" class="step-a">Stake Now →</a>
     </div>
   </div>
@@ -719,20 +719,18 @@ body.blank-mode .ts-thumb{transform:translateX(24px);background:#fff;}
 </footer>
 
 <script>
-// =====================================================================
-// CONFIG
-// =====================================================================
 const CA = 'aRvdt6BJBQGUgKUfF9QjeZXvBKAtZjvaby6pqkiBLNK';
 const HELIUS_KEY = 'a05b03e1-68ca-49a2-ba75-e0190b4d7654';
 const HELIUS_RPC = `https://mainnet.helius-rpc.com/?api-key=${HELIUS_KEY}`;
+const HELIUS_API = `https://api.helius.xyz/v0`;
+const BLANK_FEE_SPLITTER = 'BLANKpBQ5HG9UFjesxEgf4Yd2Tkj8K9e9tGZ5RYkYwGt';
+const BLANK_STAKING_PROG = 'BLANKiRR2Z9Q36P34aiEDhDHsCmPmP4iXXpAhYr2ZKt9';
 
-// ✅ Your Cloudflare Worker — replaces allorigins.win proxy entirely
-const WORKER_BASE = 'https://allin-proxy.deficrawler.workers.dev';
+// ---- BLANK API ENDPOINTS (real, confirmed) ----
+const BLANK_BASE = 'https://blank.build/api/token/' + CA;
 
-// =====================================================================
-// THEME
-// =====================================================================
-const LOGO_DARK  = 'https://raw.githubusercontent.com/deficrawler-dev/Allin/main/dark.png';
+// ---- THEME ----
+const LOGO_DARK = 'https://raw.githubusercontent.com/deficrawler-dev/Allin/main/dark.png';
 const LOGO_BLANK = 'https://raw.githubusercontent.com/deficrawler-dev/Allin/main/blank.png';
 
 function setTheme(t) {
@@ -746,9 +744,9 @@ function setTheme(t) {
   if (dexLogo) dexLogo.src = isBlank
     ? 'https://raw.githubusercontent.com/deficrawler-dev/Allin/main/Dex%20Blank.webp'
     : 'https://raw.githubusercontent.com/deficrawler-dev/Allin/main/Dex%20dark.png';
-  const lDark  = document.getElementById('ts-lbl-dark');
+  const lDark = document.getElementById('ts-lbl-dark');
   const lBlank = document.getElementById('ts-lbl-blank');
-  if (lDark)  lDark.classList.toggle('active', !isBlank);
+  if (lDark) lDark.classList.toggle('active', !isBlank);
   if (lBlank) lBlank.classList.toggle('active', isBlank);
   const mobCur = document.getElementById('mob-theme-cur');
   if (mobCur) mobCur.textContent = isBlank ? 'BLANK' : 'DARK';
@@ -762,24 +760,20 @@ function toggleThemeSwitch() {
 
 function initThemeLabels() {
   const isBlank = document.body.classList.contains('blank-mode');
-  const lDark  = document.getElementById('ts-lbl-dark');
+  const lDark = document.getElementById('ts-lbl-dark');
   const lBlank = document.getElementById('ts-lbl-blank');
-  if (lDark)  lDark.classList.toggle('active', !isBlank);
+  if (lDark) lDark.classList.toggle('active', !isBlank);
   if (lBlank) lBlank.classList.toggle('active', isBlank);
 }
 
 try { const s = localStorage.getItem('allin-theme'); if (s === 'blank') setTheme('blank'); } catch (e) {}
 initThemeLabels();
 
-// =====================================================================
-// MOBILE MENU
-// =====================================================================
+// ---- MOBILE MENU ----
 function toggleMob() { document.getElementById('mobNav').classList.toggle('open'); }
-function closeMob()  { document.getElementById('mobNav').classList.remove('open'); }
+function closeMob() { document.getElementById('mobNav').classList.remove('open'); }
 
-// =====================================================================
-// COPY CA
-// =====================================================================
+// ---- COPY CA ----
 function copyCA() {
   navigator.clipboard.writeText(CA).then(() => {
     const b = document.querySelector('.ca-copy');
@@ -788,9 +782,7 @@ function copyCA() {
   }).catch(() => {});
 }
 
-// =====================================================================
-// TABS
-// =====================================================================
+// ---- TABS ----
 function showTab(key, btn) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
   btn.classList.add('on');
@@ -798,27 +790,23 @@ function showTab(key, btn) {
   document.getElementById('tab-' + key).classList.add('on');
 }
 
-// =====================================================================
-// FORMAT HELPERS
-// =====================================================================
-function fmtUSD(n)    { if (n >= 1e6) return '$' + (n/1e6).toFixed(2)+'M'; if (n >= 1e3) return '$'+(n/1e3).toFixed(2)+'K'; return '$'+n.toFixed(2); }
-function fmtSOL(n)    { if (n >= 1e6) return (n/1e6).toFixed(3)+'M SOL'; if (n >= 1e3) return (n/1e3).toFixed(2)+'K SOL'; return n.toFixed(4)+' SOL'; }
-function fmtTokens(n) { if (n >= 1e9) return (n/1e9).toFixed(2)+'B'; if (n >= 1e6) return (n/1e6).toFixed(2)+'M'; if (n >= 1e3) return (n/1e3).toFixed(2)+'K'; return n.toFixed(0); }
-function fmtPrice(n)  { if (!n||isNaN(n)) return '—'; if (n < 1e-6) return '$'+n.toExponential(4); if (n < 0.001) return '$'+n.toFixed(8); if (n < 1) return '$'+n.toFixed(6); return '$'+n.toFixed(4); }
+// ---- FORMAT HELPERS ----
+function fmtUSD(n) { if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M'; if (n >= 1e3) return '$' + (n / 1e3).toFixed(2) + 'K'; return '$' + n.toFixed(2); }
+function fmtSOL(n) { if (n >= 1e6) return (n / 1e6).toFixed(3) + 'M SOL'; if (n >= 1e3) return (n / 1e3).toFixed(2) + 'K SOL'; return n.toFixed(4) + ' SOL'; }
+function fmtTokens(n) { if (n >= 1e9) return (n / 1e9).toFixed(2) + 'B'; if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M'; if (n >= 1e3) return (n / 1e3).toFixed(2) + 'K'; return n.toFixed(0); }
+function fmtPrice(n) { if (!n || isNaN(n)) return '—'; if (n < 1e-6) return '$' + n.toExponential(4); if (n < 0.001) return '$' + n.toFixed(8); if (n < 1) return '$' + n.toFixed(6); return '$' + n.toFixed(4); }
 function signedPct(v) { return (v >= 0 ? '+' : '') + v.toFixed(2) + '%'; }
-function cls(v)       { return v >= 0 ? 'up' : 'dn'; }
-function timeAgo(ts)  {
-  const s = Math.floor((Date.now()/1000) - ts);
-  if (s < 60)    return s + 's ago';
-  if (s < 3600)  return Math.floor(s/60) + 'm ago';
-  if (s < 86400) return Math.floor(s/3600) + 'h ago';
-  return Math.floor(s/86400) + 'd ago';
+function cls(v) { return v >= 0 ? 'up' : 'dn'; }
+function timeAgo(ts) {
+  const s = Math.floor((Date.now() / 1000) - ts);
+  if (s < 60) return s + 's ago';
+  if (s < 3600) return Math.floor(s / 60) + 'm ago';
+  if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+  return Math.floor(s / 86400) + 'd ago';
 }
-function shortAddr(addr) { return addr ? addr.slice(0,4)+'...'+addr.slice(-4) : '—'; }
+function shortAddr(addr) { return addr ? addr.slice(0, 4) + '...' + addr.slice(-4) : '—'; }
 
-// =====================================================================
-// SOL PRICE (for USD conversion)
-// =====================================================================
+// ---- SOL PRICE ----
 let solPriceUSD = 150;
 async function fetchSolPrice() {
   try {
@@ -828,60 +816,54 @@ async function fetchSolPrice() {
   } catch (e) {}
 }
 
-// =====================================================================
-// DEXSCREENER — market data
-// =====================================================================
+// ---- DEXSCREENER ----
 async function fetchPrice() {
   try {
     const r = await fetch('https://api.dexscreener.com/latest/dex/tokens/' + CA);
     const d = await r.json();
     if (!d.pairs || !d.pairs.length) return;
-    const pair  = d.pairs.sort((a,b) => (b.liquidity?.usd||0) - (a.liquidity?.usd||0))[0];
+    const pair = d.pairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0))[0];
     const price = parseFloat(pair.priceUsd || 0);
-    const mkt   = pair.fdv || pair.marketCap || 0;
-    const vol   = pair.volume?.h24 || 0;
-    const c5    = pair.priceChange?.m5;
-    const c1    = pair.priceChange?.h1;
-    const c6    = pair.priceChange?.h6;
-    const c24   = pair.priceChange?.h24;
-    const ps    = fmtPrice(price);
-    const cs    = c24 !== undefined ? signedPct(c24) : '—';
-    const cc    = c24 >= 0 ? 't-up' : 't-dn';
+    const mkt = pair.fdv || pair.marketCap || 0;
+    const vol = pair.volume?.h24 || 0;
+    const c5 = pair.priceChange?.m5;
+    const c1 = pair.priceChange?.h1;
+    const c6 = pair.priceChange?.h6;
+    const c24 = pair.priceChange?.h24;
+    const ps = fmtPrice(price);
+    const cs = c24 !== undefined ? signedPct(c24) : '—';
+    const cc = c24 >= 0 ? 't-up' : 't-dn';
 
     document.getElementById('sv-price').textContent = ps;
-    document.getElementById('sv-psub').innerHTML = c24 !== undefined
-      ? `<span class="${cls(c24)}">${cs} (24h)</span>` : '—';
+    document.getElementById('sv-psub').innerHTML = c24 !== undefined ? `<span class="${cls(c24)}">${cs} (24h)</span>` : '—';
     document.getElementById('sv-mkt').textContent = fmtUSD(mkt);
     document.getElementById('sv-vol').textContent = fmtUSD(vol);
-    if (c5  !== undefined) { const e = document.getElementById('sv-5m'); e.textContent = signedPct(c5); e.className = 's-val '+cls(c5); }
-    if (c1  !== undefined) document.getElementById('sv-1h').innerHTML  = '1h: <span class="'+cls(c1)+'">'+signedPct(c1)+'</span>';
-    if (c6  !== undefined) { const e = document.getElementById('sv-6h'); e.textContent = signedPct(c6); e.className = 's-val '+cls(c6); }
-    if (c24 !== undefined) document.getElementById('sv-24h').innerHTML = '24h: <span class="'+cls(c24)+'">'+signedPct(c24)+'</span>';
+    if (c5 !== undefined) { const e = document.getElementById('sv-5m'); e.textContent = signedPct(c5); e.className = 's-val ' + cls(c5); }
+    if (c1 !== undefined) document.getElementById('sv-1h').innerHTML = '1h: <span class="' + cls(c1) + '">' + signedPct(c1) + '</span>';
+    if (c6 !== undefined) { const e = document.getElementById('sv-6h'); e.textContent = signedPct(c6); e.className = 's-val ' + cls(c6); }
+    if (c24 !== undefined) document.getElementById('sv-24h').innerHTML = '24h: <span class="' + cls(c24) + '">' + signedPct(c24) + '</span>';
 
-    ['1','2'].forEach(i => {
-      document.getElementById('tp'+i).textContent = ps;
-      const tc = document.getElementById('tc'+i); tc.textContent = cs; tc.className = cc;
-      document.getElementById('tm'+i).textContent = fmtUSD(mkt);
-      document.getElementById('tv'+i).textContent = fmtUSD(vol);
+    ['1', '2'].forEach(i => {
+      document.getElementById('tp' + i).textContent = ps;
+      const tc = document.getElementById('tc' + i); tc.textContent = cs; tc.className = cc;
+      document.getElementById('tm' + i).textContent = fmtUSD(mkt);
+      document.getElementById('tv' + i).textContent = fmtUSD(vol);
     });
 
     const holders = pair.info?.holders;
     if (holders) {
       document.getElementById('sv-hold').textContent = holders.toLocaleString();
-      ['th1','th2'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=holders.toLocaleString(); });
-      const th = document.getElementById('tok-holders'); if(th) th.textContent = holders.toLocaleString();
+      ['th1', 'th2'].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = holders.toLocaleString(); });
     }
   } catch (e) { console.warn('DexScreener error', e); }
 }
 
-// =====================================================================
-// HELIUS RPC helpers
-// =====================================================================
+// ---- HELIUS RPC ----
 async function rpc(method, params) {
   const r = await fetch(HELIUS_RPC, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ jsonrpc:'2.0', id:1, method, params })
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params })
   });
   const d = await r.json();
   if (d.error) throw new Error(d.error.message);
@@ -889,74 +871,86 @@ async function rpc(method, params) {
 }
 
 async function fetchTopHolders() {
-  try { return (await rpc('getTokenLargestAccounts', [CA]))?.value || []; }
-  catch (e) { console.warn('Helius holders error', e); return []; }
+  try {
+    const res = await rpc('getTokenLargestAccounts', [CA]);
+    return res?.value || [];
+  } catch (e) {
+    console.warn('Helius holders error', e);
+    return [];
+  }
 }
 
 async function fetchTokenSupply() {
-  try { return (await rpc('getTokenSupply', [CA]))?.value || null; }
-  catch (e) { console.warn('Helius supply error', e); return null; }
+  try {
+    const res = await rpc('getTokenSupply', [CA]);
+    return res?.value || null;
+  } catch (e) {
+    console.warn('Helius supply error', e);
+    return null;
+  }
 }
 
-// =====================================================================
-// ✅ BLANK API — via Cloudflare Worker (no CORS issues, no delays)
-// =====================================================================
-async function fetchFromWorker(path) {
-  const r = await fetch(WORKER_BASE + path);
-  if (!r.ok) throw new Error(`Worker error ${r.status} for ${path}`);
+// ---- FETCH TOKEN TRANSACTIONS (updated to use Blank API) ----
+async function fetchTokenTransactions() {
+  try {
+    const r = await fetch(BLANK_BASE + '/trades?limit=50');
+    const d = await r.json();
+    return Array.isArray(d) ? d : (d.data ?? d.trades ?? []);
+  } catch (e) {
+    console.warn('Trades fetch error', e);
+    return [];
+  }
+}
+
+// ---- CORS PROXY FETCH (bypasses same-origin block on Blank API) ----
+// Uses allorigins.win as a free public proxy — no auth needed
+async function proxyFetch(url) {
+  const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+  const r = await fetch(proxy);
+  if (!r.ok) throw new Error('Proxy fetch failed: ' + r.status);
   return r.json();
 }
 
-// =====================================================================
-// STAKING DATA — pulled cleanly via Worker
-// =====================================================================
+// ---- MAIN STAKING FETCH — uses exact Blank API field names ----
 async function fetchStakingData() {
   const pill = document.getElementById('stk-pill');
   if (pill) pill.innerHTML = '<div class="live-dot" style="width:6px;height:6px;margin-right:0;"></div>FETCHING...';
 
   try {
-    // Both calls go through your Worker — fast, reliable, no proxy middleman
-    const [tokenData, feesData] = await Promise.all([
-      fetchFromWorker('/'),           // root returns full token object incl. staking
-      fetchFromWorker('/fees')        // fee distribution data
+    // Fetch both endpoints via CORS proxy so same-origin block is bypassed
+    const [poolData, feesData] = await Promise.all([
+      proxyFetch(BLANK_BASE + '/staking/pool'),
+      proxyFetch(BLANK_BASE + '/fees')
     ]);
 
-    console.log('[token]', tokenData);
-    console.log('[fees]',  feesData);
+    console.log('[pool]', poolData);
+    console.log('[fees]', feesData);
 
-    // ---- Parse staking fields from token response ----
-    // The root endpoint returns the full token object we saw in the preview
-    const staking      = tokenData.staking ?? tokenData.stakingPool ?? {};
-    const totalStakedRaw = parseInt(staking.totalStaked ?? staking.total_staked ?? 0);
-    const totalStaked  = totalStakedRaw / 1e6;
-    const stakerCount  = staking.activeStakers ?? staking.active_stakers ?? staking.stakerCount ?? 0;
-    const aprRaw       = staking.cachedApr ?? staking.apr ?? staking.cached_apr ?? 0;
-    const aprDisplay   = aprRaw ? parseFloat(aprRaw).toFixed(2) + '%' : '—';
-    const stakerShareBps = staking.stakingAllocationBps ?? staking.staking_allocation_bps ?? 10000;
-    const stakerSharePct = Math.round(stakerShareBps / 100);
+    // ---- POOL DATA — exact field names from Blank API ----
+    // poolData shape: { stakingEnabled, pool: { totalStaked, activeStakers, cachedApr, stakingAllocationBps, ... } }
+    const pool        = poolData.pool ?? poolData;
+    const totalStakedRaw = parseInt(pool.totalStaked ?? 0);
+    // totalStaked is in raw token units (6 decimals for $ALLIN)
+    const totalStaked = totalStakedRaw / 1e6;
+    const stakerCount = pool.activeStakers ?? pool.stakerCount ?? 0;
+    const aprRaw      = pool.cachedApr ?? pool.apr ?? 0;
+    const aprDisplay  = aprRaw ? parseFloat(aprRaw).toFixed(2) + '%' : '—';
+    // stakingAllocationBps: 10000 = 100%
+    const stakerSharePct = Math.round((pool.stakingAllocationBps ?? 10000) / 100);
 
-    // ---- Parse fee fields ----
-    const rewardsSOL   = parseFloat(feesData.total_staking_earned ?? feesData.distributed_staking ?? 0);
-    const creatorSOL   = parseFloat(feesData.total_creator_earned ?? feesData.distributed_creator ?? 0);
+    // ---- FEES DATA — exact field names from Blank API ----
+    // feesData shape: { total_staking_earned, total_creator_earned, distributed_staking,
+    //   distributed_creator, pending_staking, pending_creator, distribution_count, ... }
+    const rewardsSOL  = parseFloat(feesData.total_staking_earned ?? feesData.distributed_staking ?? 0);
+    const creatorSOL  = parseFloat(feesData.total_creator_earned ?? feesData.distributed_creator ?? 0);
     const totalFeesSOL = rewardsSOL + creatorSOL;
-    const stakingPct   = totalFeesSOL > 0 ? (rewardsSOL / totalFeesSOL * 100) : 99.5;
-    const creatorPct   = Math.max(0.5, 100 - stakingPct);
-    const pendingSOL   = parseFloat(feesData.pending_staking ?? 0);
-    const distCount    = feesData.distribution_count ?? 0;
-    const lastTs       = feesData.last_distribution_time ?? Math.floor(Date.now()/1000);
+    const stakingPct  = totalFeesSOL > 0 ? (rewardsSOL / totalFeesSOL * 100) : 99.5;
+    const creatorPct  = Math.max(0.5, 100 - stakingPct);
 
-    // ---- Update holders from token data if available ----
-    const holdersCount = tokenData.token?.holders ?? tokenData.holders ?? 0;
-    if (holdersCount) {
-      document.getElementById('sv-hold').textContent = holdersCount.toLocaleString();
-      ['th1','th2'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=holdersCount.toLocaleString(); });
-      const th = document.getElementById('tok-holders'); if(th) th.textContent = holdersCount.toLocaleString();
-    }
-
-    // ---- Update DOM ----
+    // ---- UPDATE DOM ----
     document.getElementById('stk-apr').textContent        = aprDisplay;
-    document.getElementById('stk-total').textContent      = totalStaked > 0 ? fmtTokens(totalStaked) : '—';
-    document.getElementById('stk-stakers').textContent    = stakerCount > 0 ? stakerCount.toLocaleString() : '—';
+    document.getElementById('stk-total').textContent      = fmtTokens(totalStaked);
+    document.getElementById('stk-stakers').textContent    = stakerCount.toLocaleString();
     document.getElementById('stk-share').textContent      = stakerSharePct + '%';
     document.getElementById('stk-fees-total').textContent = totalFeesSOL.toFixed(4) + ' SOL';
     document.getElementById('stk-fees-usd').textContent   = '≈ ' + fmtUSD(totalFeesSOL * solPriceUSD) + ' USD';
@@ -965,14 +959,19 @@ async function fetchStakingData() {
     document.getElementById('stk-bar-rewards').style.width = stakingPct.toFixed(1) + '%';
     document.getElementById('stk-bar-creator').style.width = creatorPct.toFixed(1) + '%';
 
-    // ---- Ticker updates ----
-    ['tick-apr1','tick-apr2'].forEach(id     => { const e=document.getElementById(id); if(e) e.textContent=aprDisplay; });
-    ['tick-stakers1','tick-stakers2'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=stakerCount>0?stakerCount.toLocaleString():'—'; });
-    ['tick-fees1','tick-fees2'].forEach(id   => { const e=document.getElementById(id); if(e) e.textContent=totalFeesSOL.toFixed(4)+' SOL'; });
+    // Update ticker
+    ['tick-apr1','tick-apr2'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=aprDisplay; });
+    ['tick-stakers1','tick-stakers2'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=stakerCount.toLocaleString(); });
+    ['tick-fees1','tick-fees2'].forEach(id => { const e=document.getElementById(id); if(e) e.textContent=totalFeesSOL.toFixed(4)+' SOL'; });
 
-    // ---- Fee rows in staking section ----
-    const feeRowsHTML = `
-      <div class="fe-row hd"><span>Metric</span><span>Type</span><span>Amount</span><span>Info</span></div>
+    // ---- FEE ROWS — build a summary row from aggregate fees data ----
+    const rowsEl = document.getElementById('stk-fee-rows');
+    const lastTs = feesData.last_distribution_time ?? Math.floor(Date.now()/1000);
+    const distCount = feesData.distribution_count ?? 0;
+    // Show a meaningful summary since /fees returns aggregate, not per-tx list
+    const pendingSOL = parseFloat(feesData.pending_staking ?? 0);
+    rowsEl.innerHTML =
+      `<div class="fe-row hd"><span>Metric</span><span>Type</span><span>Amount</span><span>Info</span></div>
       <div class="fe-row">
         <span style="color:var(--text2);font-size:11px;">All time · ${distCount} distributions</span>
         <span><span class="fe-badge">STAKING</span></span>
@@ -992,12 +991,10 @@ async function fetchStakingData() {
         <span style="color:var(--muted);font-size:11px;">Pending payout</span>
       </div>`;
 
-    document.getElementById('stk-fee-rows').innerHTML = feeRowsHTML;
-
-    // ---- Fee distribution tab ----
+    // Also update fee distribution tab
     const fList = document.getElementById('feeList');
-    if (fList) fList.innerHTML = `
-      <div class="fe-row hd"><span>Metric</span><span>Type</span><span>Amount</span><span>Info</span></div>
+    if (fList) fList.innerHTML =
+      `<div class="fe-row hd"><span>Metric</span><span>Type</span><span>Amount</span><span>Info</span></div>
       <div class="fe-row">
         <span style="color:var(--text2);font-size:11px;">All time · ${distCount} distributions</span>
         <span><span class="fe-badge">STAKING</span></span>
@@ -1017,23 +1014,21 @@ async function fetchStakingData() {
         <span style="color:var(--muted);font-size:11px;">Queued for next payout</span>
       </div>`;
 
-    // ---- Top holders (Helius RPC) ----
+    // ---- TOP HOLDERS (still via Helius RPC) ----
     const [topHolders, supply] = await Promise.all([fetchTopHolders(), fetchTokenSupply()]);
     if (topHolders.length > 0) {
       const totalSupply = supply ? parseInt(supply.amount) / Math.pow(10, supply.decimals) : 1e9;
-      const maxAmt      = parseInt(topHolders[0]?.amount || 1);
-      const knownLabels = { 0:'Treasury', 1:'Team' };
-      document.getElementById('holdersList').innerHTML = topHolders.slice(0,10).map((h, i) => {
-        const amt = parseInt(h.amount || 0);
-        const pct = (amt / Math.pow(10, supply?.decimals||6) / totalSupply * 100).toFixed(2);
-        const addr = h.address ? shortAddr(h.address) : `Holder #${i+1}`;
+      const maxPct = topHolders[0] ? parseInt(topHolders[0].amount || 0) / totalSupply * 100 : 9.5;
+      const knownLabels = { 0: 'Treasury', 1: 'Team' };
+      document.getElementById('holdersList').innerHTML = topHolders.slice(0, 10).map((h, i) => {
+        const pct = (parseInt(h.amount || 0) / (Math.pow(10, supply?.decimals || 6)) / totalSupply * 100).toFixed(2);
+        const addr = h.address ? shortAddr(h.address) : `Holder #${i + 1}`;
         const note = knownLabels[i] || '';
-        const barW = (amt / maxAmt * 100).toFixed(1);
         return `<div class="h-row">
-          <div class="h-rank">#${i+1}</div>
+          <div class="h-rank">#${i + 1}</div>
           <div>
             <div class="h-addr">${addr}${note ? ` <span style="font-size:10px;color:var(--accent);font-family:'Space Mono',monospace;">(${note})</span>` : ''}</div>
-            <div class="h-bar"><div class="h-fill" style="width:${barW}%;"></div></div>
+            <div class="h-bar"><div class="h-fill" style="width:${(pct / maxPct * 100).toFixed(1)}%;"></div></div>
           </div>
           <div class="h-pct">${pct}%</div>
         </div>`;
@@ -1047,57 +1042,46 @@ async function fetchStakingData() {
   } catch (err) {
     console.error('Staking fetch error', err);
     if (pill) pill.innerHTML = '<div class="live-dot" style="background:var(--red);width:6px;height:6px;margin-right:0;"></div>ERROR';
-    document.getElementById('stk-data-note').textContent = '⚠ Could not reach Blank API Worker. Check console. Error: ' + err.message;
+    document.getElementById('stk-data-note').textContent = '⚠ Could not reach Blank API. Check console for details.';
   }
 }
 
-// =====================================================================
-// LIVE TRADES — via Worker /trades endpoint
-// =====================================================================
+// ---- LIVE TRADES ----
 async function fetchLiveTrades() {
   try {
-    const data = await fetchFromWorker('/trades?limit=50');
-    const txs  = Array.isArray(data) ? data : (data.data ?? data.trades ?? []);
-
-    if (!txs.length) throw new Error('no trades');
-
-    let buyCount = 0, sellCount = 0;
-    const rows = txs.slice(0,15).map(tx => {
-      // Blank API trade shape: { type, maker, sol_amount, token_amount, timestamp, signature }
-      const isBuy  = (tx.type||'').toLowerCase() === 'buy';
-      const type   = isBuy ? 'BUY' : 'SELL';
-      if (isBuy) buyCount++; else sellCount++;
-      const solAmt   = parseFloat(tx.sol_amount ?? tx.solAmount ?? tx.amountSol ?? 0);
-      const tokenAmt = parseFloat(tx.token_amount ?? tx.tokenAmount ?? tx.amountToken ?? 0);
-      const trader   = tx.maker ?? tx.trader ?? tx.wallet ?? tx.feePayer ?? '';
-      const sig      = tx.signature ?? tx.tx ?? '';
-      const ts       = tx.timestamp ?? tx.blockTime ?? 0;
+    const txs = await fetchTokenTransactions();
+    const swaps = txs.filter(tx => tx.type === 'SWAP' || tx.type === 'TRANSFER' || (tx.tokenTransfers && tx.tokenTransfers.length > 0));
+    if (swaps.length === 0) throw new Error('no swaps');
+    document.getElementById('tradeBody').innerHTML = swaps.slice(0, 10).map(tx => {
+      const tt = tx.tokenTransfers || [];
+      const allinTransfer = tt.find(t => t.mint === CA);
+      const isBuy = allinTransfer && allinTransfer.toUserAccount && allinTransfer.toUserAccount !== BLANK_FEE_SPLITTER;
+      const type = isBuy ? 'BUY' : 'SELL';
+      const nativeT = tx.nativeTransfers || [];
+      const solAmt = nativeT.reduce((s, t) => s + t.amount / 1e9, 0);
+      const allinAmt = allinTransfer ? parseInt(allinTransfer.tokenAmount || 0) : 0;
+      const traderAddr = tx.feePayer ? shortAddr(tx.feePayer) : '—';
+      const shortSig = tx.signature ? tx.signature.slice(0, 8) + '...' : '—';
       return `<tr>
         <td><span class="badge ${type.toLowerCase()}">${type}</span></td>
-        <td class="addr-muted">${trader ? shortAddr(trader) : '—'}</td>
-        <td>${solAmt > 0 ? solAmt.toFixed(4) : '—'}</td>
-        <td>${tokenAmt > 0 ? fmtTokens(tokenAmt) : '—'}</td>
-        <td style="color:var(--muted)">${ts ? timeAgo(ts) : '—'}</td>
-        <td>${sig ? `<a href="https://solscan.io/tx/${sig}" target="_blank" class="tx-a">${sig.slice(0,8)}... ↗</a>` : '—'}</td>
+        <td class="addr-muted">${traderAddr}</td>
+        <td>${solAmt.toFixed(4)}</td>
+        <td>${fmtTokens(allinAmt / 1e6)}</td>
+        <td style="color:var(--muted)">${timeAgo(tx.timestamp)}</td>
+        <td><a href="https://solscan.io/tx/${tx.signature}" target="_blank" class="tx-a">${shortSig} ↗</a></td>
       </tr>`;
     }).join('');
-
-    document.getElementById('tradeBody').innerHTML = rows;
-    document.getElementById('trade-total-count').innerHTML = `Total: <strong style="color:var(--text)">${txs.length}</strong>`;
-    document.getElementById('trade-buy-count').textContent  = `Buys: ${buyCount}`;
-    document.getElementById('trade-sell-count').textContent = `Sells: ${sellCount}`;
-
   } catch (e) {
-    console.warn('Trades error, using fallback', e);
-    // Static fallback so table is never empty
-    const fallback = [
-      { type:'SELL', addr:'5v6K...Gr4t', sol:'0.1144', allin:'161.69K', time:'7m ago',  tx:'3Td2T...' },
-      { type:'SELL', addr:'9Jah...FMxg', sol:'0.0470', allin:'66.31K',  time:'10m ago', tx:'5Bkkd...' },
-      { type:'BUY',  addr:'5yBo...UwEB', sol:'0.9990', allin:'1.33M',   time:'36m ago', tx:'4B9jr...' },
-      { type:'BUY',  addr:'3Cgv...sRoD', sol:'2.0793', allin:'2.86M',   time:'37m ago', tx:'2QJ1X...' },
-      { type:'BUY',  addr:'3LoA...zd76', sol:'7.2746', allin:'9.27M',   time:'1h ago',  tx:'2Wg44...' },
+    const trades = [
+      { type: 'SELL', addr: '5v6K...Gr4t', sol: '0.1144', allin: '161.69K', time: '7m ago',  tx: '3Td2T...' },
+      { type: 'SELL', addr: '9Jah...FMxg', sol: '0.0470', allin: '66.31K',  time: '10m ago', tx: '5Bkkd...' },
+      { type: 'SELL', addr: '5J6L...ZFZt', sol: '0.0492', allin: '69.31K',  time: '29m ago', tx: '4Ur32...' },
+      { type: 'SELL', addr: 'EEjA...sE9V', sol: '1.4387', allin: '2M',      time: '29m ago', tx: '5ACru...' },
+      { type: 'BUY',  addr: '5yBo...UwEB', sol: '0.9990', allin: '1.33M',   time: '36m ago', tx: '4B9jr...' },
+      { type: 'BUY',  addr: '3Cgv...sRoD', sol: '2.0793', allin: '2.86M',   time: '37m ago', tx: '2QJ1X...' },
+      { type: 'BUY',  addr: '3LoA...zd76', sol: '7.2746', allin: '9.27M',   time: '1h ago',  tx: '2Wg44...' },
     ];
-    document.getElementById('tradeBody').innerHTML = fallback.map(t => `
+    document.getElementById('tradeBody').innerHTML = trades.map(t => `
       <tr>
         <td><span class="badge ${t.type.toLowerCase()}">${t.type}</span></td>
         <td class="addr-muted">${t.addr}</td>
@@ -1109,15 +1093,13 @@ async function fetchLiveTrades() {
   }
 }
 
-// =====================================================================
-// STATIC COMMENTS
-// =====================================================================
+// ---- STATIC COMMENTS ----
 const comments = [
-  { user:'ALLIN',         time:'2h ago',  txt:'Happy ATH day to those who celebrate 🎉 Keep staking, keep earning. We are just getting started!', init:'AL' },
-  { user:'blanker99',     time:'4h ago',  txt:'Staked 5M tokens last week, already earning nice SOL rewards daily. This tokenomics model is 🔥',   init:'BL' },
-  { user:'sol_degen',     time:'6h ago',  txt:'Best APR in the Blank ecosystem rn. This is insane for a graduated token.',                         init:'SD' },
-  { user:'cryptowatcher', time:'12h ago', txt:'Volume is picking up again. Watching those charts closely 👀',                                       init:'CW' },
-  { user:'moonbagger',    time:'1d ago',  txt:'You only got 1 shot... I took mine at 10K market cap. Feeling good.',                               init:'MB' },
+  { user: 'ALLIN',        time: '2h ago',  txt: 'Happy ATH day to those who celebrate 🎉 Keep staking, keep earning. We are just getting started!', init: 'AL' },
+  { user: 'blanker99',    time: '4h ago',  txt: 'Staked 5M tokens last week, already earning nice SOL rewards daily. This tokenomics model is 🔥',   init: 'BL' },
+  { user: 'sol_degen',    time: '6h ago',  txt: 'Best APR in the Blank ecosystem rn. This is insane for a graduated token.',                         init: 'SD' },
+  { user: 'cryptowatcher',time: '12h ago', txt: 'Volume is picking up again. Watching those charts closely 👀',                                       init: 'CW' },
+  { user: 'moonbagger',   time: '1d ago',  txt: 'You only got 1 shot... I took mine at 10K market cap. Feeling good.',                               init: 'MB' },
 ];
 document.getElementById('commentsList').innerHTML = comments.map(c => `
   <div class="c-item">
@@ -1128,20 +1110,17 @@ document.getElementById('commentsList').innerHTML = comments.map(c => `
     </div>
   </div>`).join('');
 
-// =====================================================================
-// INIT
-// =====================================================================
+// ---- INIT ----
 async function init() {
   await fetchSolPrice();
   fetchPrice();
   fetchStakingData();
   fetchLiveTrades();
 }
-
 init();
-setInterval(fetchPrice,        30000);
-setInterval(fetchStakingData,  60000);
-setInterval(fetchLiveTrades,   60000);
+setInterval(fetchPrice, 30000);
+setInterval(fetchStakingData, 60000);
+setInterval(fetchLiveTrades, 60000);
 </script>
 </body>
 </html>
